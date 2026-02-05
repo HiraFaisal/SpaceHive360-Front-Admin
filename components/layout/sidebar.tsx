@@ -17,6 +17,7 @@ import {
   User,
   GalleryVerticalEnd,
   Sparkles,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,10 +25,10 @@ import { Button } from "@/components/ui/button";
 const mainNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/workspaces", label: "Workspaces", icon: Briefcase },
-  { href: "/dashboard/bookings", label: "Bookings", icon: Calendar },
-  { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/community", label: "Community", icon: Users },
+  { href: "/dashboard/bookings", label: "Bookings", icon: Calendar },
+  { href: "/dashboard/plans", label: "Plans", icon: FileText },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
 ] as const;
 
 const supportNavItems = [

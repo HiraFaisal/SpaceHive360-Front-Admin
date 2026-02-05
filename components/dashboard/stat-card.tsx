@@ -19,13 +19,13 @@ export function StatCard({
   description,
 }: StatCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-xl border border-border/40 bg-card p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/20">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/5 text-primary transition-colors group-hover:bg-primary/10">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
           <Icon className="size-5" />
         </div>
       </div>
@@ -35,10 +35,10 @@ export function StatCard({
           {trend && (
             <span
               className={cn(
-                "flex items-center gap-0.5 font-medium",
-                trend === "up" && "text-emerald-500",
-                trend === "down" && "text-rose-500",
-                trend === "neutral" && "text-muted-foreground"
+                "flex items-center gap-0.5 font-medium rounded-full px-2 py-0.5",
+                trend === "up" && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                trend === "down" && "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                trend === "neutral" && "bg-muted text-muted-foreground"
               )}
             >
               {trend === "up" && <ArrowUpRight className="size-3" />}

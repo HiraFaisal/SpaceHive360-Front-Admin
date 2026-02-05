@@ -11,10 +11,10 @@ interface AnalyticsCardProps {
 
 export function AnalyticsCard({ title, description, type = "line", className }: AnalyticsCardProps) {
   return (
-    <div className={cn("flex flex-col rounded-xl border border-border/50 bg-card shadow-sm", className)}>
-      <div className="p-6">
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+    <div className={cn("flex flex-col rounded-xl border border-border/40 bg-card shadow-sm transition-all hover:shadow-md hover:border-primary/10", className)}>
+      <div className="p-6 border-b border-border/40">
+        <h3 className="text-base font-semibold text-foreground tracking-tight">{title}</h3>
+        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
       </div>
       
       <div className="relative flex min-h-[300px] w-full flex-1 flex-col items-center justify-center gap-4 overflow-hidden bg-muted/20 p-6">
@@ -33,14 +33,16 @@ export function AnalyticsCard({ title, description, type = "line", className }: 
              )}
         </div>
 
-        <div className="z-10 flex flex-col items-center gap-2 text-center">
-            <div className="rounded-full bg-background p-3 shadow-sm ring-1 ring-border/50">
-                {type === "line" ? <LineChart className="size-6 text-muted-foreground" /> : <BarChart className="size-6 text-muted-foreground" />}
+        <div className="z-10 flex flex-col items-center gap-3 text-center">
+            <div className="rounded-full bg-background p-4 shadow-sm ring-1 ring-border/50">
+                {type === "line" ? <LineChart className="size-6 text-primary" /> : <BarChart className="size-6 text-primary" />}
             </div>
-            <p className="text-sm font-medium text-muted-foreground">Chart Visualization</p>
-            <p className="max-w-[12rem] text-xs text-muted-foreground/60">
-                Detailed {type} chart data will be rendered here via Recharts.
-            </p>
+            <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Chart Visualization</p>
+                <p className="max-w-[12rem] text-xs text-muted-foreground/80">
+                    Detailed {type} chart data will be rendered here via Recharts.
+                </p>
+            </div>
         </div>
       </div>
     </div>

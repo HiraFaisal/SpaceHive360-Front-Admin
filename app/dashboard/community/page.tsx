@@ -1,12 +1,62 @@
+import { MotionWrapper } from "@/components/ui/motion-wrapper";
+import { CommunityFeed } from "@/components/community/community-feed";
+import { CommunityStats } from "@/components/community/community-stats";
+import { UpcomingEvents } from "@/components/community/upcoming-events";
+import { ActiveMembers } from "@/components/community/active-members";
+import { Button } from "@/components/ui/button";
+import { CalendarPlus, PenSquare } from "lucide-react";
+
 export default function CommunityPage() {
   return (
-    <div className="space-y-6">
-       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Community</h1>
-        <p className="text-muted-foreground">Engage with your members.</p>
-      </div>
-      <div className="rounded-xl border bg-card p-12 flex items-center justify-center text-muted-foreground shadow-sm">
-        <p>Community Feed Component</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <MotionWrapper delay={0.05}>
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-1.5">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Community Hub</h1>
+            <p className="text-sm text-muted-foreground">
+              Engage, connect, and grow your workspace community
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              className="hidden sm:flex items-center gap-2 rounded-lg border-border hover:bg-muted"
+            >
+              <CalendarPlus className="h-4 w-4" />
+              Create Event
+            </Button>
+            <Button className="flex items-center gap-2 rounded-lg bg-primary hover:bg-primary/90">
+              <PenSquare className="h-4 w-4" />
+              Create Post
+            </Button>
+          </div>
+        </div>
+      </MotionWrapper>
+
+      {/* Main Content Grid */}
+      <div className="grid gap-8 lg:grid-cols-[1fr_380px] items-start">
+        {/* Main Feed Column */}
+        <div className="min-w-0">
+          <MotionWrapper delay={0.1}>
+            <CommunityFeed />
+          </MotionWrapper>
+        </div>
+
+        {/* Sidebar Widgets Column */}
+        <div className="space-y-6">
+          <MotionWrapper delay={0.15}>
+            <CommunityStats />
+          </MotionWrapper>
+
+          <MotionWrapper delay={0.2}>
+            <UpcomingEvents />
+          </MotionWrapper>
+
+          <MotionWrapper delay={0.25}>
+            <ActiveMembers />
+          </MotionWrapper>
+        </div>
       </div>
     </div>
   );
