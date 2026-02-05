@@ -11,6 +11,7 @@ import { AnalyticsCard } from "@/components/dashboard/analytics-card";
 import { AIRecommendations } from "@/components/dashboard/ai-recommendations";
 import { LatestActivities } from "@/components/dashboard/latest-activities";
 import { BookingsTable, type Booking } from "@/components/dashboard/bookings-table";
+import { MotionWrapper } from "@/components/ui/motion-wrapper";
 
 // Mock Data Constants matching Stitch Design
 const MOCK_STATS = [
@@ -115,37 +116,45 @@ export default function DashboardPage() {
       </div>
 
       {/* 2. KPI Stats Grid (6 items) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {MOCK_STATS.map((stat, index) => (
-          <StatCard key={index} {...stat} />
-        ))}
-      </div>
+      <MotionWrapper delay={0.1}>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {MOCK_STATS.map((stat, index) => (
+            <StatCard key={index} {...stat} />
+          ))}
+        </div>
+      </MotionWrapper>
 
       {/* 3. Analytics Section */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <AnalyticsCard
-          title="Revenue Analytics"
-          description="Monthly revenue data for the current year."
-          type="bar"
-        />
-        <AnalyticsCard
-          title="Occupancy Overview"
-          description="Occupancy trends over the last 6 months."
-          type="line"
-        />
-      </div>
+      <MotionWrapper delay={0.2}>
+        <div className="grid gap-4 md:grid-cols-2">
+          <AnalyticsCard
+            title="Revenue Analytics"
+            description="Monthly revenue data for the current year."
+            type="bar"
+          />
+          <AnalyticsCard
+            title="Occupancy Overview"
+            description="Occupancy trends over the last 6 months."
+            type="line"
+          />
+        </div>
+      </MotionWrapper>
 
       {/* 4. AI & Activities Row */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <AIRecommendations />
-        <LatestActivities />
-      </div>
+      <MotionWrapper delay={0.3}>
+        <div className="grid gap-4 md:grid-cols-2">
+          <AIRecommendations />
+          <LatestActivities />
+        </div>
+      </MotionWrapper>
 
       {/* 5. Recent Bookings (Timeline) */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">Bookings Timeline</h2>
-        <BookingsTable bookings={MOCK_BOOKINGS} />
-      </div>
+      <MotionWrapper delay={0.4}>
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold tracking-tight">Bookings Timeline</h2>
+          <BookingsTable bookings={MOCK_BOOKINGS} />
+        </div>
+      </MotionWrapper>
     </div>
   );
 }
