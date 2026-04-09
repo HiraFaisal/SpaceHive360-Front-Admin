@@ -212,17 +212,20 @@ export function SidebarContent({
             </div>
           )}
         </div>
-        <Link
-          href="/login"
-          onClick={onMobileClose}
-          className={cn(
-            "mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-secondary/50 hover:text-foreground",
-            isCollapsed && "lg:justify-center lg:px-2"
-          )}
-        >
-          <LogOut className="size-5 shrink-0" />
-          {!isCollapsed && <span>Log out</span>}
-        </Link>
+        <Button
+  variant="ghost"
+  onClick={() => {
+    localStorage.removeItem("token"); // ✅ clear auth
+    window.location.href = "/login";  // force redirect
+  }}
+  className={cn(
+    "mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-secondary/50 hover:text-foreground",
+    isCollapsed && "lg:justify-center lg:px-2"
+  )}
+>
+  <LogOut className="size-5 shrink-0" />
+  {!isCollapsed && <span>Log out</span>}
+</Button>
       </div>
     </div>
   );
