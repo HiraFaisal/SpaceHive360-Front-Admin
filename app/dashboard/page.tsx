@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   Building2, 
   Users, 
@@ -15,99 +19,31 @@ import { MotionWrapper } from "@/components/ui/motion-wrapper";
 
 // Mock Data Constants matching Stitch Design
 const MOCK_STATS = [
-  {
-    title: "Total Revenue",
-    value: "$42,500",
-    icon: CreditCard,
-    trend: "up" as const,
-    trendValue: "+5.2%",
-    description: "this month",
-  },
-  {
-    title: "Active Members",
-    value: "312",
-    icon: Users,
-    trend: "up" as const,
-    trendValue: "+12",
-    description: "vs last month",
-  },
-  {
-    title: "Total Bookings Today",
-    value: "58",
-    icon: Calendar,
-    trend: "neutral" as const,
-    trendValue: "",
-    description: "Scheduled for today",
-  },
-  {
-    title: "Occupancy Rate",
-    value: "82%",
-    icon: Building2,
-    trend: "up" as const,
-    trendValue: "+1.8%",
-    description: "vs last month",
-  },
-  {
-    title: "Unpaid Invoices",
-    value: "$5,230",
-    icon: AlertCircle,
-    trend: "neutral" as const,
-    trendValue: "Pending",
-    description: "Needs attention",
-  },
-  {
-    title: "AI Insights Alerts",
-    value: "3",
-    icon: TrendingUp, // Using TrendingUp as a placeholder for AutoAwesome/AI icon
-    trend: "neutral" as const,
-    trendValue: "Alerts",
-    description: "needing attention",
-  },
+  { title: "Total Revenue", value: "$42,500", icon: CreditCard, trend: "up" as const, trendValue: "+5.2%", description: "this month" },
+  { title: "Active Members", value: "312", icon: Users, trend: "up" as const, trendValue: "+12", description: "vs last month" },
+  { title: "Total Bookings Today", value: "58", icon: Calendar, trend: "neutral" as const, trendValue: "", description: "Scheduled for today" },
+  { title: "Occupancy Rate", value: "82%", icon: Building2, trend: "up" as const, trendValue: "+1.8%", description: "vs last month" },
+  { title: "Unpaid Invoices", value: "$5,230", icon: AlertCircle, trend: "neutral" as const, trendValue: "Pending", description: "Needs attention" },
+  { title: "AI Insights Alerts", value: "3", icon: TrendingUp, trend: "neutral" as const, trendValue: "Alerts", description: "needing attention" },
 ];
 
 const MOCK_BOOKINGS: Booking[] = [
-  {
-    id: "BK-1024",
-    workspace: "Private Suite A1",
-    user: {
-      name: "Olivia Rhye",
-      email: "olivia@untitledui.com",
-      image: "/avatars/olivia.jpg",
-    },
-    date: "Oct 24, 2024",
-    duration: "9:00 AM - 5:00 PM",
-    status: "confirmed",
-    amount: "$320.00",
-  },
-  {
-    id: "BK-1023",
-    workspace: "Conference Room B",
-    user: {
-      name: "Phoenix Baker",
-      email: "phoenix@math.dev",
-      image: "/avatars/phoenix.jpg",
-    },
-    date: "Oct 24, 2024",
-    duration: "1:00 PM - 2:30 PM",
-    status: "pending",
-    amount: "$150.00",
-  },
-  {
-    id: "BK-1022",
-    workspace: "Hot Desk Zone",
-    user: {
-      name: "Lana Steiner",
-      email: "lana@design.co",
-      image: "/avatars/lana.jpg",
-    },
-    date: "Oct 23, 2024",
-    duration: "All Day",
-    status: "confirmed",
-    amount: "$45.00",
-  },
+  { id: "BK-1024", workspace: "Private Suite A1", user: { name: "Olivia Rhye", email: "olivia@untitledui.com", image: "/avatars/olivia.jpg" }, date: "Oct 24, 2024", duration: "9:00 AM - 5:00 PM", status: "confirmed", amount: "$320.00" },
+  { id: "BK-1023", workspace: "Conference Room B", user: { name: "Phoenix Baker", email: "phoenix@math.dev", image: "/avatars/phoenix.jpg" }, date: "Oct 24, 2024", duration: "1:00 PM - 2:30 PM", status: "pending", amount: "$150.00" },
+  { id: "BK-1022", workspace: "Hot Desk Zone", user: { name: "Lana Steiner", email: "lana@design.co", image: "/avatars/lana.jpg" }, date: "Oct 23, 2024", duration: "All Day", status: "confirmed", amount: "$45.00" },
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
+
+  // CLIENT-SIDE GUARD
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login"); // Redirect if no token
+    }
+  }, [router]);
+
   return (
     <div className="space-y-6">
       {/* 1. Header Section */}
@@ -127,16 +63,8 @@ export default function DashboardPage() {
       {/* 3. Analytics Section */}
       <MotionWrapper delay={0.2}>
         <div className="grid gap-4 md:grid-cols-2">
-          <AnalyticsCard
-            title="Revenue Analytics"
-            description="Monthly revenue data for the current year."
-            type="bar"
-          />
-          <AnalyticsCard
-            title="Occupancy Overview"
-            description="Occupancy trends over the last 6 months."
-            type="line"
-          />
+          <AnalyticsCard title="Revenue Analytics" description="Monthly revenue data for the current year." type="bar" />
+          <AnalyticsCard title="Occupancy Overview" description="Occupancy trends over the last 6 months." type="line" />
         </div>
       </MotionWrapper>
 
