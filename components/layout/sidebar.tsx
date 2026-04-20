@@ -27,6 +27,7 @@ const mainNavItems = [
   { href: "/dashboard/workspaces", label: "Workspaces", icon: Briefcase },
   { href: "/dashboard/community", label: "Community", icon: Users },
   { href: "/dashboard/bookings", label: "Bookings", icon: Calendar },
+  { href: "/dashboard/booking-management", label: "Booking Mgmt", icon: GalleryVerticalEnd },
   { href: "/dashboard/plans", label: "Plans", icon: FileText },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
 ] as const;

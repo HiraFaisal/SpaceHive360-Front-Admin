@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CoWork Admin - Bookings Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0077C0",
+                        "on-primary": "#FFFFFF",
+                        background: "#FAFAFA",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "12px",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Public Sans", "sans-serif"],
+                        body: ["Public Sans", "sans-serif"],
+                        label: ["Public Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; background-color: #FAFAFA; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="antialiased text-slate-900">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 border-r fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 z-50 flex flex-col p-4 overflow-y-auto">
+<div class="mb-8 px-2">
+<span class="text-xl font-black text-indigo-600">CoWork Admin</span>
+<div class="mt-6 flex items-center gap-3 p-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+<img alt="Organization Logo" class="w-10 h-10 rounded-lg object-cover" data-alt="minimalist professional corporate logo with geometric shapes in indigo and white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHNWumagau4-L8h_cdPAUtD3ZbL6JKpj1s1f0OEMCpdDVMpu_qAluuFebZYBiNrAYIYkQdGtPyrjaiISjSIGoy3p6A2-y8jv_GF7wYCa_d0SBjU9uddkzLjyrYM01xwC1K0JiIKLcU8sjEeMWcf1KjUL57mmwgZhAIrUIfz5w4nStnjI1XsaDLse1kYJc8Yrl3qtaPS3QEDuXZm0J6q0mDB_3ribDbEggYsQCkAnczh0F2N_4D6NtpNscr8qka3eM1c1sBw-NHuso"/>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Main Office</p>
+<p class="text-xs text-slate-500">Enterprise Plan</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150 ease-in-out text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+                Bookings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150 ease-in-out text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Members
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150 ease-in-out text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+                Floor Plan
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150 ease-in-out text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+                Billing
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150 ease-in-out text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150 ease-in-out text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="headset_mic">headset_mic</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150 ease-in-out text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-6 h-16 w-full sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm font-sans antialiased">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" placeholder="Search bookings, members, or spaces..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-full relative cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-full cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="h-8 w-px bg-slate-200 dark:border-slate-800 mx-2"></div>
+<div class="flex items-center gap-3 pl-2">
+<img alt="Admin profile" class="w-8 h-8 rounded-full object-cover border border-slate-200" data-alt="professional headshot of a smiling administrative manager in a modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4qXWp6sjL1xB93Pl584RlrF1xjFUGW8vzoW3pLVCSIyUs2KQIhBEoHNnjXUlAtK1CTRcgDPRf-Ur1eGhO7E8ZA0BSOkgoHHY4y2KzAkmfg64sbb7iIWjV8NZaAYeeShcf1bD1sjUURtn5dersqzygQ1h9amkmdbOCBsKWFXK6WuEW58H7_Z7XJOK-91GXUhgLzOUkXSgqCK4kHDONtglWvO0EuDHSo5XOJm9p_N-tBHfnjGi_E0pavr6odPbcvbD3fGPqakLxkos"/>
+<span class="text-sm font-semibold text-slate-900 dark:text-white">Alex Rivera</span>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<main class="p-8 space-y-8 flex-1">
+<!-- Headline Section -->
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Bookings Management</h1>
+<p class="text-slate-500 mt-1 text-sm">Monitor and organize all workspace reservations in real-time.</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-2xl font-semibold flex items-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl">add</span>
+                    New Booking
+                </button>
+</div>
+<!-- KPI Analytics Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-blue-50 rounded-lg">
+<span class="material-symbols-outlined text-primary">event_available</span>
+</div>
+<span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
+</div>
+<div class="mt-4">
+<p class="text-slate-500 text-sm font-medium">Total Bookings</p>
+<h3 class="text-2xl font-extrabold text-slate-900">1,284</h3>
+</div>
+</div>
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-indigo-50 rounded-lg">
+<span class="material-symbols-outlined text-indigo-600">bolt</span>
+</div>
+<span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">Active</span>
+</div>
+<div class="mt-4">
+<p class="text-slate-500 text-sm font-medium">Active Bookings</p>
+<h3 class="text-2xl font-extrabold text-slate-900">42</h3>
+</div>
+</div>
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-purple-50 rounded-lg">
+<span class="material-symbols-outlined text-purple-600">analytics</span>
+</div>
+<span class="text-xs font-bold text-slate-400">Target 90%</span>
+</div>
+<div class="mt-4">
+<p class="text-slate-500 text-sm font-medium">Occupancy Rate</p>
+<h3 class="text-2xl font-extrabold text-slate-900">84.2%</h3>
+</div>
+</div>
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-green-50 rounded-lg">
+<span class="material-symbols-outlined text-green-600">payments</span>
+</div>
+<span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+$4.2k today</span>
+</div>
+<div class="mt-4">
+<p class="text-slate-500 text-sm font-medium">Total Revenue</p>
+<h3 class="text-2xl font-extrabold text-slate-900">$128,450</h3>
+</div>
+</div>
+</div>
+<!-- Filters Bar -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-4">
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-slate-500 text-lg">calendar_month</span>
+<span class="text-sm font-medium">Oct 12 - Oct 19, 2023</span>
+</div>
+<div class="h-8 w-px bg-slate-200"></div>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 bg-primary text-white rounded-xl text-sm font-semibold">All Spaces</button>
+<button class="px-4 py-1.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-medium border border-slate-100 transition-colors">Hot Desk</button>
+<button class="px-4 py-1.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-medium border border-slate-100 transition-colors">Meeting Room</button>
+<button class="px-4 py-1.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-medium border border-slate-100 transition-colors">Private Office</button>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-lg border border-slate-200 transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-lg border border-slate-200 transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+<!-- Main Bookings Table Container -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50/50 border-b border-slate-100">
+<th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Customer</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Space</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Date &amp; Time</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Duration</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Payment</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Customer avatar" class="w-9 h-9 rounded-full object-cover" data-alt="professional portrait of a young male entrepreneur with glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmA3NdS8hybvrAoBmOkihHhDU5oBEg6MbYnoyDXcGNQ7nt443I2aa15PrbojRP_IuGK2K8fCPn5tGlfYUEDdsDS0j15Xt_MdhgEeCFT3mge2uupT_G5H14r9eu1oOnv9NDnehxVTuJrQt0KgUb00wYFjq0dKUjais1EOytTcKr2bqrvhZitVxVq3qSGM1jMAJXHDVG0waBm-jQ2wB5tyBhBdcqiam9tYyrpj_iwqepk2T5SKHP-3NU2MxW0WNbvnRVzU5Sz34pVBs"/>
+<div>
+<p class="text-sm font-bold text-slate-900">Marcus Sterling</p>
+<p class="text-xs text-slate-500">marcus@fintech.io</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div>
+<p class="text-sm font-semibold text-slate-700">Studio 4B</p>
+<p class="text-xs text-slate-400">Meeting Room</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm">
+<p class="font-medium text-slate-700">Oct 14, 2023</p>
+<p class="text-slate-400">09:00 AM - 11:30 AM</p>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-600">2.5 Hours</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                        Confirmed
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        Paid
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Customer avatar" class="w-9 h-9 rounded-full object-cover" data-alt="close up of a professional woman with curly hair smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyvX_pSn4FQqnZGUcbl4VuZkImXpQ9GQi4nkDoYQxEis_Fm--x08W-7yC5ONBZuyjOYTASTCId2KiggjYXNTI8pR_VrfujB0QcNQtZ5bWLAo2x6eU-MOg8t_xdnWWdTXyf3qKNPmQ-K7Kn3ZjxIkJqxi4etORSKQXt2It8O06kTEkRfT6g5sZ4vTuTfMlau7PTza0-inqXtB2KJkbLElmh1e0vwY2F9ISDTCSMyK9GFFzv4jWktIzrMjnbF3tPIXM3uqUpntXdViA"/>
+<div>
+<p class="text-sm font-bold text-slate-900">Elena Rodriguez</p>
+<p class="text-xs text-slate-500">elena.r@designhub.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div>
+<p class="text-sm font-semibold text-slate-700">Desk H-12</p>
+<p class="text-xs text-slate-400">Hot Desk</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm">
+<p class="font-medium text-slate-700">Oct 14, 2023</p>
+<p class="text-slate-400">Full Day</p>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-600">8 Hours</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
+                                        Pending
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        Unpaid
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500 text-xs">JH</div>
+<div>
+<p class="text-sm font-bold text-slate-900">James Harrison</p>
+<p class="text-xs text-slate-500">james@nexus.tech</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div>
+<p class="text-sm font-semibold text-slate-700">Executive Suite 2</p>
+<p class="text-xs text-slate-400">Private Office</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm">
+<p class="font-medium text-slate-700">Oct 15, 2023</p>
+<p class="text-slate-400">02:00 PM - 05:00 PM</p>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-600">3 Hours</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                        Confirmed
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        Paid
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Customer avatar" class="w-9 h-9 rounded-full object-cover" data-alt="cheerful woman with a professional look in a modern creative workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrvsSevqxqdMT_Kk1qYH7IxIL3sLG5ZfyM2Jx4j-i5ACdLdTYyFo8Urr8vAk8IGGnB8YXrwqyENmsp5Vw5Auy2581FcUHqINxta9Zo9kauvHahVdbdz26nvk3jXqXQfP4sj3rrRpaJFpUwbNK8UdXK8JxBNHpL_Xh5A8bBb391yWlrKKU2fTUzAIn8lrv5o7Un8VNB2W1RAjsPF6t6DESpaDMHDEaaITvHkjUOhChVq20Ls9OrStM2QOIpZL0Nx6PSVN3PfrUh6Ks"/>
+<div>
+<p class="text-sm font-bold text-slate-900">Sarah Jenkins</p>
+<p class="text-xs text-slate-500">s.jenkins@freelance.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div>
+<p class="text-sm font-semibold text-slate-700">Desk G-01</p>
+<p class="text-xs text-slate-400">Hot Desk</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm">
+<p class="font-medium text-slate-700">Oct 15, 2023</p>
+<p class="text-slate-400">Full Day</p>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium text-slate-600">8 Hours</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                                        Cancelled
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                                        Refunded
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
+<p class="text-xs font-medium text-slate-500">Showing 1 to 4 of 1,284 bookings</p>
+<div class="flex gap-2">
+<button class="p-2 border border-slate-200 rounded-lg text-slate-400 hover:bg-slate-50 disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-lg leading-none">chevron_left</span>
+</button>
+<div class="flex items-center px-2 gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white text-xs font-bold">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 text-xs font-medium">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 text-xs font-medium">3</button>
+<span class="text-slate-400">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 text-xs font-medium">128</button>
+</div>
+<button class="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">
+<span class="material-symbols-outlined text-lg leading-none">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
