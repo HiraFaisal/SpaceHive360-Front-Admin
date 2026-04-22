@@ -12,15 +12,18 @@ export const metadata: Metadata = {
   description: "Premium Coworking Management Dashboard",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${outfit.variable} font-sans`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${outfit.variable} font-sans antialiased`}>
         {children}
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

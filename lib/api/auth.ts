@@ -18,7 +18,7 @@ export const login = async (data: LoginRequest): Promise<string> => {
       headers: { "Content-Type": "application/json" },
     });
     // The backend returns { token: "...", expiration: "..." }
-    return response.data.token;
+    return response.data;
   } catch (err: any) {
     let message = "Login failed";
 

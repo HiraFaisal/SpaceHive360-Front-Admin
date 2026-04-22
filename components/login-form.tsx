@@ -29,6 +29,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
 
     try {
       const token = await login({ email, password });
+
+      console.log("LOGIN RESULT:", token);
       // Store JWT
       localStorage.setItem("token", token);
       // Redirect to dashboard
