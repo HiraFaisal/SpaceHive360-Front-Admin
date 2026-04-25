@@ -10,7 +10,8 @@ import {
     Plus,
     Eye,
     Edit,
-    Trash2
+    Trash2,
+    AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,10 +23,17 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import { NewWorkspaceSheet } from "@/components/workspaces/new-workspace-sheet";
-
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { WorkspaceSheet } from "@/components/workspaces/workspace-sheet";
+import { deleteWorkspace, getWorkspaces } from "@/lib/api/workspaces";
 import { useEffect } from "react";
-import { getWorkspaces } from "@/lib/api/workspaces";
 import { getWorkspaceTypes } from "@/lib/api/workspaceTypes";
 import { getLocations } from "@/lib/api/locations";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +45,16 @@ export default function WorkspaceListPage() {
     const [types, setTypes] = useState<any[]>([]);
     const [locations, setLocations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    
+    // Sheet states
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [sheetMode, setSheetMode] = useState<"create" | "view" | "edit">("create");
+    const [selectedWorkspace, setSelectedWorkspace] = useState<any>(null);
+
+    // Delete dialog states
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [workspaceToDelete, setWorkspaceToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -63,6 +81,36 @@ export default function WorkspaceListPage() {
 
     const refreshData = () => {
         fetchData();
+        setIsSheetOpen(false);
+        setSelectedWorkspace(null);
+    };
+
+    const handleAction = (mode: "view" | "edit" | "create", workspace?: any) => {
+        setSheetMode(mode);
+        setSelectedWorkspace(workspace || null);
+        setIsSheetOpen(true);
+    };
+
+    const confirmDelete = (workspace: any) => {
+        setWorkspaceToDelete(workspace);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!workspaceToDelete) return;
+        
+        try {
+            setIsDeleting(true);
+            await deleteWorkspace(workspaceToDelete.recId);
+            toast.success("Workspace deleted successfully");
+            setIsDeleteDialogOpen(false);
+            setWorkspaceToDelete(null);
+            fetchData();
+        } catch (error) {
+            toast.error("Failed to delete workspace");
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const getTypeName = (typeId: string) => {
@@ -86,7 +134,12 @@ export default function WorkspaceListPage() {
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">All Workspaces</h1>
                     <p className="text-muted-foreground text-sm">Manage individual workspace units and availability.</p>
                 </div>
-                <NewWorkspaceSheet onSuccess={refreshData} />
+                <Button 
+                    onClick={() => handleAction("create")}
+                    className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                >
+                    <Plus className="h-4 w-4" /> Add Workspace
+                </Button>
             </div>
 
             <div className="flex items-center gap-2 bg-card p-4 rounded-lg border shadow-sm">
@@ -163,13 +216,28 @@ export default function WorkspaceListPage() {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                onClick={() => handleAction("view", ws)}
+                                            >
                                                 <Eye className="h-4 w-4" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                onClick={() => handleAction("edit", ws)}
+                                            >
                                                 <Edit className="h-4 w-4" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500/70 hover:text-red-600 hover:bg-red-50">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-8 w-8 text-red-500/70 hover:text-red-600 hover:bg-red-50"
+                                                onClick={() => confirmDelete(ws)}
+                                            >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -186,6 +254,69 @@ export default function WorkspaceListPage() {
                     </TableBody>
                 </Table>
             </div>
+
+            {/* View/Edit Sheet */}
+            <WorkspaceSheet 
+                open={isSheetOpen}
+                onOpenChange={setIsSheetOpen}
+                mode={sheetMode}
+                initialData={selectedWorkspace}
+                onSuccess={refreshData}
+            />
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent className="sm:max-w-[425px] overflow-hidden p-0 border-none shadow-2xl">
+                    <div className="bg-destructive/10 p-6 flex flex-col items-center gap-4 text-center">
+                        <div className="h-16 w-16 rounded-full bg-destructive/20 flex items-center justify-center animate-pulse">
+                            <AlertTriangle className="h-8 w-8 text-destructive" />
+                        </div>
+                        <div className="space-y-1">
+                            <DialogTitle className="text-2xl font-bold text-foreground">Delete Workspace</DialogTitle>
+                            <DialogDescription className="text-muted-foreground">
+                                This action cannot be undone. Are you sure?
+                            </DialogDescription>
+                        </div>
+                    </div>
+                    
+                    <div className="p-6 pt-0 space-y-4">
+                        <div className="rounded-lg bg-muted/50 p-4 border border-border/50">
+                            <p className="text-sm text-muted-foreground">You are about to delete:</p>
+                            <p className="text-lg font-semibold text-foreground mt-1">{workspaceToDelete?.name}</p>
+                            <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                                <Building2 className="h-3.5 w-3.5" />
+                                <span>{getTypeName(workspaceToDelete?.fkWorkspaceType)}</span>
+                                <span>•</span>
+                                <MapPin className="h-3.5 w-3.5" />
+                                <span>{getLocationName(workspaceToDelete?.fkLocation)}</span>
+                            </div>
+                        </div>
+                        
+                        <DialogFooter className="flex-col sm:flex-row gap-3 pt-2">
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsDeleteDialogOpen(false)}
+                                className="flex-1 h-11"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="flex-1 h-11 shadow-lg shadow-destructive/20 transition-all hover:scale-[1.02]"
+                            >
+                                {isDeleting ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-4 w-4 border-2 border-white/30 border-t-white animate-spin rounded-full" />
+                                        Deleting...
+                                    </div>
+                                ) : "Yes, Delete Workspace"}
+                            </Button>
+                        </DialogFooter>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
