@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { PlanData } from "@/app/dashboard/plans/page";
+import { PlanData } from "./types";
+
 
 interface FeaturesCardProps {
   data: PlanData;

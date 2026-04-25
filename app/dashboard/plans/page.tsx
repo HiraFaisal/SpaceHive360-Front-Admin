@@ -41,12 +41,19 @@ import { useEffect } from "react";
 import { getWorkspaces } from "@/lib/api/workspaces";
 import { getWorkspaceTypes } from "@/lib/api/workspaceTypes";
 import { getPaymentTerms } from "@/lib/api/paymentTerms";
-import { createPlanMembership } from "@/lib/api/planMemberships";
+import { createPlanMembership, getPlanMembershipById, updatePlanMembership } from "@/lib/api/planMemberships";
 import { getLocations } from "@/lib/api/locations";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 import { toast } from "sonner";
 
 export default function PlansPage() {
+  const searchParams = useSearchParams();
+  const planId = searchParams.get("id");
+  const isEdit = searchParams.get("edit") === "true";
+
   const {
     register,
     handleSubmit,
@@ -103,19 +110,44 @@ export default function PlansPage() {
           paymentTerms: pt,
           locations: loc,
         });
+
+        // Real pre-filling for Edit mode
+        if (isEdit && planId) {
+          const res = await getPlanMembershipById(planId);
+          if (res.success) {
+            const plan = res.data;
+            setValue("name", plan.name);
+            setValue("description", plan.description || "");
+            setValue("planCategory", plan.planCategory || "membership");
+            setValue("fkWorkspaceType", plan.fkWorkspaceType || "");
+            setValue("fkWorkspace", plan.fkWorkspace || "");
+            setValue("fkLocation", plan.fkLocation || "");
+            setValue("fkCompany", plan.fkCompany || "");
+            setValue("durationType", plan.durationType?.toLowerCase() || "monthly");
+            setValue("durationValue", plan.durationValue || 1);
+            setValue("price", plan.price?.toString() || "0");
+            setValue("fkPaymentTerm", plan.fkPaymentTerm || "");
+            setValue("isRecurring", plan.isRecurring);
+            setValue("allowCancellation", plan.allowCancellation);
+            setValue("requiresApproval", plan.requiresApproval);
+            setValue("features", plan.features || []);
+            // Images are handled differently (pre-existing vs new)
+          }
+        }
       } catch (err) {
         console.error("Error fetching options:", err);
       }
     };
     fetchOptions();
-  }, []);
+  }, [isEdit, planId, setValue]);
 
   const updateData = (key: keyof PlanData, value: any) => {
     setValue(key, value, { shouldValidate: true });
   };
 
   const handleSave = async (values: PlanData) => {
-    const toastId = toast.loading("Creating plan membership...");
+    const actionLabel = isEdit ? "Updating" : "Creating";
+    const toastId = toast.loading(`${actionLabel} plan membership...`);
     try {
       const formData = new FormData();
       
@@ -148,24 +180,42 @@ export default function PlansPage() {
         formData.append(`Features[${index}]`, feature);
       });
 
-      // Images (Files)
+      // Images (Files) - Only append if there are new files
       values.images.forEach((image) => {
-        formData.append("Images", image);
+        if (image instanceof File) {
+          formData.append("Images", image);
+        }
       });
 
-      await createPlanMembership(formData);
-      toast.success("Plan Membership created successfully!", { id: toastId });
-      reset();
+      if (isEdit && planId) {
+        await updatePlanMembership(planId, formData);
+        toast.success("Plan Membership updated successfully!", { id: toastId });
+      } else {
+        await createPlanMembership(formData);
+        toast.success("Plan Membership created successfully!", { id: toastId });
+        reset();
+      }
     } catch (err: any) {
       console.error("Error saving plan:", err);
-      toast.error("Failed to save plan: " + err.message, { id: toastId });
+      toast.error(`Failed to ${isEdit ? 'update' : 'create'} plan: ` + err.message, { id: toastId });
     }
   };
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Create New Plan</h2>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+            <Link href="/dashboard/plans" className="hover:text-primary transition-colors">Plans</Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground font-medium">
+              {isEdit ? "Edit Plan" : "Create Plan"}
+            </span>
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {isEdit ? "Edit Plan" : "Create New Plan"}
+          </h2>
+        </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" onClick={() => reset()}>Discard</Button>
           <Button 
@@ -173,7 +223,7 @@ export default function PlansPage() {
             className="bg-primary hover:bg-primary/90"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Saving..." : "Save Plan"}
+            {isSubmitting ? "Saving..." : isEdit ? "Update Plan" : "Save Plan"}
           </Button>
         </div>
       </div>

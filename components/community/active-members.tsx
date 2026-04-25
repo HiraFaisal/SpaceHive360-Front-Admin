@@ -3,11 +3,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus } from "lucide-react";
 
 const MEMBERS = [
-  { name: "John Doe", avatar: "/avatars/john.jpg", initials: "JD", online: true },
-  { name: "Alice Smith", avatar: "/avatars/alice.jpg", initials: "AS", online: true },
-  { name: "Bob Johnson", avatar: "/avatars/bob.jpg", initials: "BJ", online: false },
-  { name: "Emma Wilson", avatar: "/avatars/emma.jpg", initials: "EW", online: true },
-  { name: "David Lee", avatar: "/avatars/david.jpg", initials: "DL", online: true },
+  { name: "John Doe", initials: "JD", online: true },
+  { name: "Alice Smith", initials: "AS", online: true },
+  { name: "Bob Johnson", initials: "BJ", online: false },
+  { name: "Emma Wilson", initials: "EW", online: true },
+  { name: "David Lee", initials: "DL", online: true },
 ];
 
 export function ActiveMembers() {
@@ -21,7 +21,6 @@ export function ActiveMembers() {
           {MEMBERS.map((member, i) => (
             <div key={i} className="relative">
               <Avatar className="inline-block h-11 w-11 ring-2 ring-background border border-border/50 transition-transform hover:scale-110 hover:z-10 cursor-pointer">
-                <AvatarImage src={member.avatar} alt={member.name} />
                 <AvatarFallback className="bg-muted text-xs font-semibold">
                   {member.initials}
                 </AvatarFallback>

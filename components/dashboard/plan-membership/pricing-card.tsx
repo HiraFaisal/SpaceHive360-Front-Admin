@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlanData } from "@/app/dashboard/plans/page";
+import { PlanData } from "./types";
+
 
 interface PricingCardProps {
   data: PlanData;

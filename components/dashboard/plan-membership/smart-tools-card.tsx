@@ -3,7 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Sparkles, BarChart, Zap } from "lucide-react";
-import { PlanData } from "@/app/dashboard/plans/page";
+import { PlanData } from "./types";
+
 
 interface SmartToolsCardProps {
   data: PlanData;

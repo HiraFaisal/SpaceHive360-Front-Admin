@@ -22,81 +22,71 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { NewWorkspaceSheet } from "@/components/workspaces/new-workspace-sheet";
 
-// Mock Data
-const workspaces = [
-    { id: 1, name: "Alpha Conference Room", type: "Conference Room", location: "Building A, Floor 2", capacity: 20, status: "Active" },
-    { id: 2, name: "Beta Hot Desk Area", type: "Hot Desk", location: "Building A, Floor 1", capacity: 50, status: "Active" },
-    { id: 3, name: "Gamma Private Office", type: "Private Office", location: "Building B, Suite 101", capacity: 4, status: "Occupied" },
-    { id: 4, name: "Delta Meeting Pod", type: "Meeting Booth", location: "Building A, Lobby", capacity: 2, status: "Maintenance" },
-    { id: 5, name: "Epsilon Event Hall", type: "Event Space", location: "Building C, Ground", capacity: 200, status: "Active" },
-];
+import { useEffect } from "react";
+import { getWorkspaces } from "@/lib/api/workspaces";
+import { getWorkspaceTypes } from "@/lib/api/workspaceTypes";
+import { getLocations } from "@/lib/api/locations";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 export default function WorkspaceListPage() {
     const [searchTerm, setSearchTerm] = useState("");
-    const [isAddOpen, setIsAddOpen] = useState(false);
+    const [workspaces, setWorkspaces] = useState<any[]>([]);
+    const [types, setTypes] = useState<any[]>([]);
+    const [locations, setLocations] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const [wsData, typesData, locData] = await Promise.all([
+                getWorkspaces(),
+                getWorkspaceTypes(),
+                getLocations()
+            ]);
+            setWorkspaces(wsData);
+            setTypes(typesData);
+            setLocations(locData);
+        } catch (error) {
+            console.error("Error fetching workspaces:", error);
+            toast.error("Failed to load workspaces. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const refreshData = () => {
+        fetchData();
+    };
+
+    const getTypeName = (typeId: string) => {
+        return types.find(t => t.recId === typeId)?.name || "Unknown Type";
+    };
+
+    const getLocationName = (locationId: string) => {
+        return locations.find(l => l.recId === locationId)?.name || "Unknown Location";
+    };
 
     const filteredWorkspaces = workspaces.filter(ws =>
         ws.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ws.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ws.location.toLowerCase().includes(searchTerm.toLowerCase())
+        getTypeName(ws.fkWorkspaceType).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getLocationName(ws.fkLocation).toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
-                    <h1 className="text-3xl font-bold tracking-tight">All Workspaces</h1>
-                    <p className="text-muted-foreground">Manage individual workspace units and availability.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">All Workspaces</h1>
+                    <p className="text-muted-foreground text-sm">Manage individual workspace units and availability.</p>
                 </div>
-                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="gap-2">
-                            <Plus className="h-4 w-4" /> Add Workspace
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Add New Workspace</DialogTitle>
-                            <DialogDescription>
-                                Create a new workspace unit. Click save when you're done.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="name" className="text-right">
-                                    Name
-                                </Label>
-                                <Input id="name" placeholder="e.g. Ocean View Room" className="col-span-3" />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="type" className="text-right">
-                                    Type
-                                </Label>
-                                <Input id="type" placeholder="e.g. Conference" className="col-span-3" />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="capacity" className="text-right">
-                                    Capacity
-                                </Label>
-                                <Input id="capacity" type="number" className="col-span-3" />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit" onClick={() => setIsAddOpen(false)}>Save changes</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                <NewWorkspaceSheet onSuccess={refreshData} />
             </div>
 
             <div className="flex items-center gap-2 bg-card p-4 rounded-lg border shadow-sm">
@@ -125,64 +115,76 @@ export default function WorkspaceListPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredWorkspaces.map((ws) => (
-                            <TableRow key={ws.id} className="group">
-                                <TableCell className="font-medium">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                                            <Building2 className="h-5 w-5" />
+                        {loading ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                                    <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                                    <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                                    <TableCell><Skeleton className="h-6 w-12" /></TableCell>
+                                    <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                                    <TableCell><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                                </TableRow>
+                            ))
+                        ) : filteredWorkspaces.length > 0 ? (
+                            filteredWorkspaces.map((ws) => (
+                                <TableRow key={ws.recId} className="group">
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                                <Building2 className="h-5 w-5" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span>{ws.name}</span>
+                                                <span className="text-xs text-muted-foreground sm:hidden">{getTypeName(ws.fkWorkspaceType)}</span>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span>{ws.name}</span>
-                                            <span className="text-xs text-muted-foreground sm:hidden">{ws.type}</span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium ring-1 ring-inset ring-gray-500/10">
+                                            {getTypeName(ws.fkWorkspaceType)}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center text-muted-foreground gap-1">
+                                            <MapPin className="h-3.5 w-3.5" /> {getLocationName(ws.fkLocation)}
                                         </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium ring-1 ring-inset ring-gray-500/10">
-                                        {ws.type}
-                                    </span>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex items-center text-muted-foreground gap-1">
-                                        <MapPin className="h-3.5 w-3.5" /> {ws.location}
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex items-center text-muted-foreground gap-1">
-                                        <Users className="h-3.5 w-3.5" /> {ws.capacity}
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${ws.status === 'Active' ? 'bg-green-50 text-green-700 ring-green-600/20' :
-                                            ws.status === 'Occupied' ? 'bg-blue-50 text-blue-700 ring-blue-600/20' :
-                                                'bg-yellow-50 text-yellow-700 ring-yellow-600/20'
-                                        }`}>
-                                        {ws.status}
-                                    </span>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                                            <Edit className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500/70 hover:text-red-600 hover:bg-red-50">
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center text-muted-foreground gap-1">
+                                            <Users className="h-3.5 w-3.5" /> {ws.capacity || 0}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${ws.isActive ? 'bg-green-50 text-green-700 ring-green-600/20' : 'bg-red-50 text-red-700 ring-red-600/20'
+                                            }`}>
+                                            {ws.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500/70 hover:text-red-600 hover:bg-red-50">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                    No workspaces found matching your search.
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        )}
                     </TableBody>
                 </Table>
-                {filteredWorkspaces.length === 0 && (
-                    <div className="p-12 text-center text-muted-foreground">
-                        No workspaces found matching your search.
-                    </div>
-                )}
             </div>
         </div>
     );

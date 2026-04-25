@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UploadCloud } from "lucide-react";
-import { PlanData } from "@/app/dashboard/plans/page";
+import { PlanData } from "./types";
+
 
 interface PlanDetailsCardProps {
   data: PlanData;

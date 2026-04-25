@@ -1,27 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { PlanDetailsCard } from "@/components/dashboard/plans/plan-details-card";
-import { PricingCard } from "@/components/dashboard/plans/pricing-card";
-import { FeaturesCard } from "@/components/dashboard/plans/features-card";
-import { SmartToolsCard } from "@/components/dashboard/plans/smart-tools-card";
-import { LivePreviewCard } from "@/components/dashboard/plans/live-preview-card";
+import { PlanDetailsCard } from "@/components/dashboard/plan-membership/plan-details-card";
+import { PricingCard } from "@/components/dashboard/plan-membership/pricing-card";
+import { FeaturesCard } from "@/components/dashboard/plan-membership/features-card";
+import { SmartToolsCard } from "@/components/dashboard/plan-membership/smart-tools-card";
+import { LivePreviewCard } from "@/components/dashboard/plan-membership/live-preview-card";
+import { PlanData } from "@/components/dashboard/plan-membership/types";
 import { Button } from "@/components/ui/button";
 
-export interface PlanData {
-  name: string;
-  type: string;
-  description: string;
-  price: string;
-  billingCycle: string;
-  trialPeriod: string;
-  features: string[];
-  aiRecommendation: boolean;
-  tags: string;
-  image: string | null;
-}
 
-export default function PlansPage() {
+export default function PlanMembershipPage() {
   const [data, setData] = useState<PlanData>({
     name: "Ultimate Freelancer Desk",
     type: "hotDesk",
@@ -42,7 +31,7 @@ export default function PlansPage() {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Create New Plan</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Create New Plan Membership</h2>
         <div className="flex items-center space-x-2">
           <Button variant="outline">Discard</Button>
           <Button>Save Plan</Button>
@@ -62,3 +51,4 @@ export default function PlansPage() {
     </div>
   );
 }
+

@@ -28,9 +28,9 @@ const MOCK_STATS = [
 ];
 
 const MOCK_BOOKINGS: Booking[] = [
-  { id: "BK-1024", workspace: "Private Suite A1", user: { name: "Olivia Rhye", email: "olivia@untitledui.com", image: "/avatars/olivia.jpg" }, date: "Oct 24, 2024", duration: "9:00 AM - 5:00 PM", status: "confirmed", amount: "$320.00" },
-  { id: "BK-1023", workspace: "Conference Room B", user: { name: "Phoenix Baker", email: "phoenix@math.dev", image: "/avatars/phoenix.jpg" }, date: "Oct 24, 2024", duration: "1:00 PM - 2:30 PM", status: "pending", amount: "$150.00" },
-  { id: "BK-1022", workspace: "Hot Desk Zone", user: { name: "Lana Steiner", email: "lana@design.co", image: "/avatars/lana.jpg" }, date: "Oct 23, 2024", duration: "All Day", status: "confirmed", amount: "$45.00" },
+  { id: "BK-1024", workspace: "Private Suite A1", user: { name: "Olivia Rhye", email: "olivia@untitledui.com" }, date: "Oct 24, 2024", duration: "9:00 AM - 5:00 PM", status: "confirmed", amount: "$320.00" },
+  { id: "BK-1023", workspace: "Conference Room B", user: { name: "Phoenix Baker", email: "phoenix@math.dev" }, date: "Oct 24, 2024", duration: "1:00 PM - 2:30 PM", status: "pending", amount: "$150.00" },
+  { id: "BK-1022", workspace: "Hot Desk Zone", user: { name: "Lana Steiner", email: "lana@design.co" }, date: "Oct 23, 2024", duration: "All Day", status: "confirmed", amount: "$45.00" },
 ];
 
 export default function DashboardPage() {

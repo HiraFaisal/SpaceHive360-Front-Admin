@@ -17,7 +17,6 @@ const POSTS = [
       name: "Sarah Chen",
       role: "Startup Founder",
       location: "Downtown Hub",
-      avatar: "/avatars/sarah.jpg",
       initials: "SC",
     },
     time: "2 hours ago",
@@ -34,7 +33,6 @@ const POSTS = [
       name: "Marcus Thorne",
       role: "Fullstack Dev",
       location: "Northside Collective",
-      avatar: "/avatars/marcus.jpg",
       initials: "MT",
     },
     time: "5 hours ago",
@@ -83,7 +81,6 @@ export function CommunityFeed() {
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
-                    <AvatarImage src={post.author.avatar} alt={post.author.name} />
                     <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                       {post.author.initials}
                     </AvatarFallback>

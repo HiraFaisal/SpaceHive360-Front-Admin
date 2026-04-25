@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from "lucide-react";
 import Image from "next/image";
-import { PlanData } from "@/app/dashboard/plans/page";
+import { PlanData } from "./types";
 
 interface LivePreviewCardProps {
   data: PlanData;
 }
+
 
 export function LivePreviewCard({ data }: LivePreviewCardProps) {
   return (
@@ -25,15 +26,12 @@ export function LivePreviewCard({ data }: LivePreviewCardProps) {
                     className="object-cover"
                 />
             ) : (
-                <Image 
-                    src="/modern-office.png" 
-                    alt="Workspace Preview" 
-                    fill 
-                    className="object-cover"
-                />
+                <div className="w-full h-full flex items-center justify-center bg-zinc-100">
+                    <span className="text-zinc-400 text-sm">No Image Preview</span>
+                </div>
             )}
              <div className="absolute top-4 right-4 flex gap-2">
-                 {data.tags.split(',').map((tag, i) => tag.trim() && (
+                 {data.tags?.split(',').map((tag, i) => tag.trim() && (
                     <Badge key={i} variant="secondary" className="bg-white/90 text-zinc-900 hover:bg-white backdrop-blur-md border border-zinc-200/50 shadow-sm">{tag.trim()}</Badge>
                  ))}
              </div>
@@ -41,7 +39,9 @@ export function LivePreviewCard({ data }: LivePreviewCardProps) {
         
         <CardHeader className="pb-2">
             <CardTitle className="text-2xl font-bold">{data.name || "Plan Name"}</CardTitle>
-            <p className="text-sm text-zinc-500 mt-1 capitalize">{data.type.replace(/([A-Z])/g, ' $1').trim()}</p>
+            <p className="text-sm text-zinc-500 mt-1 capitalize">
+                {data.type?.replace(/([A-Z])/g, ' $1').trim() || "Standard"}
+            </p>
         </CardHeader>
         <CardContent className="space-y-6">
             <div className="flex items-baseline">
@@ -50,13 +50,13 @@ export function LivePreviewCard({ data }: LivePreviewCardProps) {
             </div>
 
             <div className="space-y-3">
-                {data.features.map((feature, i) => (
+                {data.features?.map((feature, i) => (
                     <div key={i} className="flex items-center text-sm text-zinc-600">
                         <CheckCircle className="mr-3 h-5 w-5 text-[#0078c2]" />
                         {feature}
                     </div>
                 ))}
-                 {data.features.length === 0 && (
+                 {(!data.features || data.features.length === 0) && (
                     <div className="text-sm text-zinc-400 italic">No features added</div>
                 )}
             </div>
@@ -68,3 +68,4 @@ export function LivePreviewCard({ data }: LivePreviewCardProps) {
     </div>
   );
 }
+

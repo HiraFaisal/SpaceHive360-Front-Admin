@@ -9,9 +9,9 @@ const EVENTS = [
     day: "24",
     location: "Rooftop Lounge",
     attendees: [
-      { src: "/avatars/john.jpg", initials: "JD" },
-      { src: "/avatars/alice.jpg", initials: "AS" },
-      { src: "/avatars/bob.jpg", initials: "BJ" },
+      { initials: "JD" },
+      { initials: "AS" },
+      { initials: "BJ" },
     ],
     extraCount: 18,
   },
@@ -22,8 +22,8 @@ const EVENTS = [
     day: "28",
     location: "Main Studio",
     attendees: [
-      { src: "/avatars/emma.jpg", initials: "EW" },
-      { src: "/avatars/sarah.jpg", initials: "SC" },
+      { initials: "EW" },
+      { initials: "SC" },
     ],
     extraCount: 32,
   },
@@ -67,7 +67,6 @@ export function UpcomingEvents() {
                     key={i}
                     className="inline-block h-6 w-6 ring-2 ring-background border border-border/50"
                   >
-                    <AvatarImage src={attendee.src} />
                     <AvatarFallback className="bg-muted text-[9px] font-semibold">
                       {attendee.initials}
                     </AvatarFallback>
