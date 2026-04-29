@@ -1,294 +1,278 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calendar as CalendarIcon,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Clock,
-  MapPin,
-  User,
-  Download,
-  Plus,
-  RefreshCcw,
-  CheckCircle2,
-  DollarSign,
-  TrendingUp,
-  Percent,
-  CalendarCheck
-} from "lucide-react";
-import { format } from "date-fns";
-
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import { NewBookingSheet } from "@/components/bookings/new-booking-sheet";
+import { toast } from "sonner";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, ChevronRight, Save, Trash2, X } from "lucide-react";
 
-const stats = [
-  {
-    title: "Total Bookings",
-    value: "1,284",
-    trend: "+12.5%",
-    trendUp: true,
-    icon: CalendarCheck,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10"
-  },
-  {
-    title: "Active Bookings",
-    value: "42",
-    trend: "+4.2%",
-    trendUp: true,
-    icon: CheckCircle2,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10"
-  },
-  {
-    title: "Occupancy Rate",
-    value: "84.2%",
-    trend: "-2.1%",
-    trendUp: false,
-    icon: Percent,
-    color: "text-purple-500",
-    bg: "bg-purple-500/10"
-  },
-  {
-    title: "Total Revenue",
-    value: "$128,450",
-    trend: "+18.2%",
-    trendUp: true,
-    icon: DollarSign,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10"
-  }
-];
+import { getWorkspaces } from "@/lib/api/workspaces";
+import { getWorkspaceTypes } from "@/lib/api/workspaceTypes";
+import { getLocations } from "@/lib/api/locations";
+import { createPlanBooking, getPlanBookingById, updatePlanBooking } from "@/lib/api/planBookings";
 
-const mockBookings = [
-  {
-    id: "BKG-1",
-    user: "Marcus Sterling",
-    email: "marcus@fintech.io",
-    avatar: "MS",
-    resource: "Studio 4B",
-    type: "Meeting Room",
-    date: new Date(2023, 9, 14),
-    startTime: "09:00 AM",
-    endTime: "11:30 AM",
-    status: "Active"
-  },
-  {
-    id: "BKG-2",
-    user: "Elena Rodriguez",
-    email: "elena.r@designhub.com",
-    avatar: "ER",
-    resource: "Desk H-12",
-    type: "Hot Desk",
-    date: new Date(2023, 9, 14),
-    startTime: "09:00 AM",
-    endTime: "05:00 PM",
-    duration: "Full Day",
-    status: "Active"
-  },
-  {
-    id: "BKG-3",
-    user: "James Harrison",
-    email: "james@nexus.tech",
-    avatar: "JH",
-    resource: "Executive Suite 2",
-    type: "Private Office",
-    date: new Date(2023, 9, 15),
-    startTime: "02:00 PM",
-    endTime: "05:00 PM",
-    status: "Upcoming"
-  },
-  {
-    id: "BKG-4",
-    user: "Sarah Jenkins",
-    email: "s.jenkins@freelance.com",
-    avatar: "SJ",
-    resource: "Desk G-01",
-    type: "Hot Desk",
-    date: new Date(2023, 9, 15),
-    startTime: "09:00 AM",
-    endTime: "05:00 PM",
-    duration: "Full Day",
-    status: "Upcoming"
-  }
-];
+import { BookingDetailsCard } from "@/components/dashboard/booking-management/BookingDetailsCard";
+import { BookingScheduleCard } from "@/components/dashboard/booking-management/BookingScheduleCard";
+import { BookingPricingCard } from "@/components/dashboard/booking-management/BookingPricingCard";
+import { BookingRulesCard } from "@/components/dashboard/booking-management/BookingRulesCard";
+import { BookingFeaturesCard } from "@/components/dashboard/booking-management/BookingFeaturesCard";
+import { BookingLivePreview } from "@/components/dashboard/booking-management/BookingLivePreview";
+
+const bookingSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  fkWorkspaceType: z.string().min(1, "Workspace type is required"),
+  fkWorkspace: z.string().min(1, "Workspace is required"),
+  fkLocation: z.string().optional(),
+  fkCompany: z.string().optional(),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
+  availableDays: z.array(z.string()).min(1, "Select at least one available day"),
+  minDurationMinutes: z.number().min(1, "Minimum duration is required"),
+  maxDurationMinutes: z.number().min(1, "Maximum duration is required"),
+  priceType: z.string().min(1, "Price type is required"),
+  price: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, {
+    message: "Price must be a positive number",
+  }),
+  allowCancellation: z.boolean(),
+  requiresApproval: z.boolean(),
+  isVisible: z.boolean(),
+  features: z.array(z.string()).optional(),
+  images: z.array(z.any()).optional(),
+});
+
+export type BookingData = z.infer<typeof bookingSchema>;
 
 export default function BookingManagementPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const bookingId = searchParams.get("id");
+  const isEdit = searchParams.get("edit") === "true";
+  const isView = searchParams.get("view") === "true";
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<BookingData>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      fkWorkspaceType: "",
+      fkWorkspace: "",
+      startTime: "09:00",
+      endTime: "18:00",
+      availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      minDurationMinutes: 60,
+      maxDurationMinutes: 480,
+      priceType: "hourly",
+      price: "0",
+      allowCancellation: true,
+      requiresApproval: false,
+      isVisible: true,
+      features: [],
+      images: [],
+    },
+  });
+
+  const data = watch();
+
+  const [options, setOptions] = useState({
+    workspaces: [] as any[],
+    workspaceTypes: [] as any[],
+    locations: [] as any[],
+  });
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const [ws, wt, loc] = await Promise.all([
+          getWorkspaces(),
+          getWorkspaceTypes(),
+          getLocations(),
+        ]);
+        setOptions({
+          workspaces: ws,
+          workspaceTypes: wt,
+          locations: loc,
+        });
+
+        if ((isEdit || isView) && bookingId) {
+          const res = await getPlanBookingById(bookingId);
+          if (res.success) {
+            const booking = res.data;
+            reset({
+              name: booking.name,
+              description: booking.description || "",
+              fkWorkspaceType: booking.fkWorkspaceType || "",
+              fkWorkspace: booking.fkWorkspace || "",
+              fkLocation: booking.fkLocation || "",
+              fkCompany: booking.fkCompany || "",
+              startTime: booking.startTime?.substring(0, 5) || "09:00",
+              endTime: booking.endTime?.substring(0, 5) || "18:00",
+              availableDays: booking.availableDays || [],
+              minDurationMinutes: booking.minDurationMinutes || 60,
+              maxDurationMinutes: booking.maxDurationMinutes || 480,
+              priceType: booking.priceType || "hourly",
+              price: booking.price?.toString() || "0",
+              allowCancellation: booking.allowCancellation,
+              requiresApproval: booking.requiresApproval,
+              isVisible: booking.isVisible,
+              features: booking.features || [],
+              images: booking.images || [],
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching options:", err);
+        toast.error("Failed to load options");
+      }
+    };
+    fetchOptions();
+  }, [bookingId, isEdit, isView, reset]);
+
+  const updateData = (key: keyof BookingData, value: any) => {
+    setValue(key, value, { shouldValidate: true });
+  };
+
+  const handleSave = async (values: BookingData) => {
+    const toastId = toast.loading(isEdit ? "Updating booking plan..." : "Creating booking plan...");
+    try {
+      const formData = new FormData();
+      formData.append("Name", values.name);
+      formData.append("Description", values.description);
+      formData.append("FkWorkspaceType", values.fkWorkspaceType);
+      formData.append("FkWorkspace", values.fkWorkspace);
+      if (values.fkLocation) formData.append("FkLocation", values.fkLocation);
+      if (values.fkCompany) formData.append("FkCompany", values.fkCompany);
+      formData.append("StartTime", values.startTime + ":00");
+      formData.append("EndTime", values.endTime + ":00");
+      formData.append("MinDurationMinutes", values.minDurationMinutes.toString());
+      formData.append("MaxDurationMinutes", values.maxDurationMinutes.toString());
+      formData.append("PriceType", values.priceType);
+      formData.append("Price", values.price);
+      formData.append("AllowCancellation", values.allowCancellation.toString());
+      formData.append("RequiresApproval", values.requiresApproval.toString());
+      formData.append("IsVisible", values.isVisible.toString());
+
+      values.availableDays.forEach((day, index) => {
+        formData.append(`AvailableDays[${index}]`, day);
+      });
+
+      if (values.features) {
+        values.features.forEach((feature, index) => {
+          formData.append(`Features[${index}]`, feature);
+        });
+      }
+
+      if (values.images) {
+        values.images.forEach((image) => {
+          if (image instanceof File) {
+            formData.append("Images", image);
+          }
+        });
+      }
+
+      if (isEdit && bookingId) {
+        const response = await updatePlanBooking(bookingId, formData);
+        if (response.success) {
+          toast.success("Booking plan updated successfully!", { id: toastId });
+          setTimeout(() => {
+            router.push("/dashboard/booking-management/all");
+          }, 1000);
+        } else {
+          toast.error(response.message || "Failed to update plan", { id: toastId });
+        }
+      } else {
+        const response = await createPlanBooking(formData);
+        if (response.success) {
+          toast.success("Booking plan created successfully!", { id: toastId });
+          setTimeout(() => {
+            router.push("/dashboard/booking-management/all");
+          }, 1000);
+        } else {
+          toast.error(response.message || "Failed to create plan", { id: toastId });
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred", { id: toastId });
+    }
+  };
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-8">
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Bookings Management</h1>
-          <p className="text-muted-foreground text-sm">Monitor and organize all workspace reservations in real-time.</p>
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+            <Link href="/dashboard/booking-management/all" className="hover:text-primary transition-colors">Booking Management</Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground font-medium">
+              {isView ? "View Plan" : isEdit ? "Edit Plan" : "Create Plan"}
+            </span>
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {isView ? "Plan Details" : isEdit ? "Edit Booking Plan" : "Create Booking Plan"}
+          </h2>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2 bg-transparent border-input hover:bg-accent/50 transition-colors">
-            <Download className="h-4 w-4" /> Export Report
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" onClick={() => router.back()}>
+            {isView ? "Back" : "Discard"}
           </Button>
-          <NewBookingSheet />
+          {!isView && (
+            <Button onClick={handleSubmit(handleSave)} disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : isEdit ? "Update Plan" : "Save Plan"}
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div 
-              key={index} 
-              className="p-6 rounded-2xl border bg-card/60 backdrop-blur-xl shadow-sm hover:shadow-md transition-all duration-300 group"
-            >
-              <div className="flex justify-between items-start">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                  <p className="text-3xl font-bold tracking-tight">{stat.value}</p>
-                </div>
-                <div className={cn("p-2.5 rounded-xl transition-colors", stat.bg)}>
-                  <Icon className={cn("h-5 w-5", stat.color)} />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm gap-1.5">
-                <span className={cn(
-                  "flex items-center font-medium",
-                  stat.trendUp ? "text-emerald-500" : "text-rose-500"
-                )}>
-                  {stat.trendUp ? <TrendingUp className="h-3.5 w-3.5 mr-1" /> : <TrendingUp className="h-3.5 w-3.5 mr-1 rotate-180" />}
-                  {stat.trend}
-                </span>
-                <span className="text-muted-foreground">vs last month</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Main Content Area */}
-      <div className="rounded-2xl border bg-card/60 backdrop-blur-xl shadow-sm overflow-hidden flex flex-col">
-        {/* Toolbar */}
-        <div className="p-4 border-b flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="relative w-full sm:w-80 group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <Input 
-                className="pl-9 bg-background/50 border-input w-full transition-shadow focus-visible:ring-1 focus-visible:ring-primary/50" 
-                placeholder="Search bookings by name, email, or workspace..." 
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <Button variant="outline" size="sm" className="h-9 gap-2 text-muted-foreground hover:text-foreground">
-              <Filter className="h-4 w-4" /> Filters
-            </Button>
-            <Button variant="outline" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
-              <RefreshCcw className="h-4 w-4" />
-            </Button>
-          </div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4 space-y-6">
+          <BookingDetailsCard
+            data={data}
+            updateData={updateData}
+            workspaces={options.workspaces}
+            workspaceTypes={options.workspaceTypes}
+            errors={errors}
+            disabled={isView}
+          />
+          <BookingScheduleCard
+            data={data}
+            updateData={updateData}
+            errors={errors}
+            disabled={isView}
+          />
+          <BookingPricingCard
+            data={data}
+            updateData={updateData}
+            errors={errors}
+            disabled={isView}
+          />
+          <BookingRulesCard
+            data={data}
+            updateData={updateData}
+            disabled={isView}
+          />
+          <BookingFeaturesCard
+            data={data}
+            updateData={updateData}
+            errors={errors}
+            disabled={isView}
+          />
         </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/30">
-              <TableRow className="hover:bg-transparent border-b">
-                <TableHead className="py-4 pl-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-[300px]">Member Details</TableHead>
-                <TableHead className="py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Workspace</TableHead>
-                <TableHead className="py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date & Time</TableHead>
-                <TableHead className="py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</TableHead>
-                <TableHead className="py-4 pr-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockBookings.map((booking) => (
-                <TableRow key={booking.id} className="hover:bg-muted/20 transition-colors border-b group">
-                  <TableCell className="py-4 pl-6">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/10 text-primary font-semibold text-sm">
-                        {booking.avatar}
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-semibold text-sm text-foreground truncate">{booking.user}</span>
-                        <span className="text-sm text-muted-foreground truncate">{booking.email}</span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex flex-col">
-                      <span className="font-medium text-sm">{booking.resource}</span>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                        <MapPin className="h-3 w-3" /> {booking.type}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex flex-col">
-                      <span className="font-medium text-sm text-foreground">
-                        {format(booking.date, 'MMM dd, yyyy')}
-                      </span>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                        <Clock className="h-3 w-3" /> {booking.duration || `${booking.startTime} - ${booking.endTime}`}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <span className={cn(
-                      "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border",
-                      booking.status === 'Active' 
-                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30' 
-                        : 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30'
-                    )}>
-                      {booking.status === 'Active' && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />}
-                      {booking.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-4 pr-6 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40 rounded-xl shadow-lg border-muted/50 p-1">
-                        <DropdownMenuItem className="cursor-pointer rounded-md">Edit Details</DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer rounded-md">View Receipt</DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-muted/50" />
-                        <DropdownMenuItem className="cursor-pointer rounded-md text-destructive focus:text-destructive focus:bg-destructive/10">Cancel Booking</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        
-        {/* Pagination Info */}
-        <div className="p-4 border-t border-border/50 text-sm flex items-center justify-between text-muted-foreground">
-          <span>Showing <span className="font-medium text-foreground">1</span> to <span className="font-medium text-foreground">4</span> of <span className="font-medium text-foreground">1,284</span> bookings</span>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-8 shadow-sm" disabled>Previous</Button>
-            <Button variant="outline" size="sm" className="h-8 shadow-sm">Next</Button>
-          </div>
+        <div className="hidden md:block col-span-3">
+          <BookingLivePreview
+            data={data}
+            workspaces={options.workspaces}
+          />
         </div>
       </div>
     </div>
