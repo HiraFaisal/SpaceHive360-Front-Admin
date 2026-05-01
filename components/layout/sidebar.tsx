@@ -21,6 +21,7 @@ import {
   Plus,
   List,
   ArrowLeft,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,11 +47,17 @@ const mainNavItems = [
     submenuId: "plans" 
   },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { 
+    href: "/dashboard/settings", 
+    label: "Settings", 
+    icon: Settings,
+    hasSubmenu: true,
+    submenuId: "settings"
+  },
 ] as const;
 
 const supportNavItems = [
   { href: "/dashboard/support", label: "Support", icon: HelpCircle },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ] as const;
 
 interface SidebarContentProps {
@@ -337,6 +344,55 @@ export function SidebarContent({
                 <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Smart Tip</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Booking plans are best for meeting rooms and hourly hot-desks.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Secondary Submenu Panel - Settings */}
+        {activeSubmenu === "settings" && (
+          <div className="absolute inset-0 px-3 py-4 space-y-6 animate-in slide-in-from-right duration-300">
+            <div className="space-y-4">
+              <button 
+                onClick={() => setActiveSubmenu(null)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-primary transition-colors group"
+              >
+                <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+                <span>Back</span>
+              </button>
+              
+              <div className="px-3">
+                <h3 className="text-lg font-bold tracking-tight">Settings</h3>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1">Configuration</p>
+              </div>
+
+              <ul className="space-y-0.5">
+                <li>
+                  <Link
+                    href="/dashboard/settings/locations"
+                    onClick={onMobileClose}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      pathname.startsWith("/dashboard/settings/locations")
+                        ? "bg-secondary text-foreground shadow-sm"
+                        : "text-muted-foreground hover:-translate-y-px hover:bg-secondary/50 hover:text-foreground hover:shadow-sm"
+                    )}
+                  >
+                    {pathname.startsWith("/dashboard/settings/locations") && (
+                      <span className="absolute left-2 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
+                    )}
+                    <Building2 className={cn("size-5 shrink-0 transition-colors duration-200", pathname.startsWith("/dashboard/settings/locations") && "text-primary")} />
+                    <span className="truncate">Locations</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="px-3 pt-4 border-t border-sidebar-border/50">
+              <div className="rounded-xl bg-primary/5 p-4 border border-primary/10">
+                <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Notice</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Locations are used to group workspaces and plans.
                 </p>
               </div>
             </div>
