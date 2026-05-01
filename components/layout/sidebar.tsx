@@ -30,6 +30,7 @@ const mainNavItems = [
   { href: "/dashboard/workspaces", label: "Workspaces", icon: Briefcase },
   { href: "/dashboard/community", label: "Community", icon: Users },
   { href: "/dashboard/bookings", label: "Bookings", icon: Calendar },
+  { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
   { 
     href: "/dashboard/booking-management", 
     label: "Booking Mgmt", 

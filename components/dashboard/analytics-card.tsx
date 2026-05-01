@@ -1,49 +1,71 @@
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { LineChart, BarChart } from "lucide-react";
+import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area } from "recharts";
+
+const MOCK_DATA = [
+  { name: "Jan", value: 4000 },
+  { name: "Feb", value: 3000 },
+  { name: "Mar", value: 5000 },
+  { name: "Apr", value: 4500 },
+  { name: "May", value: 6000 },
+  { name: "Jun", value: 5500 },
+];
 
 interface AnalyticsCardProps {
   title: string;
   description?: string;
-  type?: "line" | "bar";
+  type?: "line" | "bar" | "area";
   className?: string;
 }
 
 export function AnalyticsCard({ title, description, type = "line", className }: AnalyticsCardProps) {
   return (
-    <div className={cn("flex flex-col rounded-xl border border-border/40 bg-card shadow-sm transition-all hover:shadow-md hover:border-primary/10", className)}>
+    <div className={cn("flex flex-col rounded-xl border border-border/40 bg-card shadow-sm transition-all hover:shadow-md hover:border-primary/20", className)}>
       <div className="p-6 border-b border-border/40">
         <h3 className="text-base font-semibold text-foreground tracking-tight">{title}</h3>
         {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
       </div>
       
-      <div className="relative flex min-h-[300px] w-full flex-1 flex-col items-center justify-center gap-4 overflow-hidden bg-muted/20 p-6">
-        {/* Placeholder Visuals */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-[0.03]">
-             {type === "line" ? (
-                 <svg viewBox="0 0 100 100" className="h-full w-full stroke-foreground" fill="none">
-                     <path d="M0 100 C 20 50 50 80 100 20" strokeWidth="2" />
-                 </svg>
-             ) : (
-                 <div className="flex items-end gap-2 h-1/2">
-                     <div className="w-8 h-1/2 bg-foreground" />
-                     <div className="w-8 h-3/4 bg-foreground" />
-                     <div className="w-8 h-full bg-foreground" />
-                 </div>
-             )}
-        </div>
-
-        <div className="z-10 flex flex-col items-center gap-3 text-center">
-            <div className="rounded-full bg-background p-4 shadow-sm ring-1 ring-border/50">
-                {type === "line" ? <LineChart className="size-6 text-primary" /> : <BarChart className="size-6 text-primary" />}
-            </div>
-            <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Chart Visualization</p>
-                <p className="max-w-[12rem] text-xs text-muted-foreground/80">
-                    Detailed {type} chart data will be rendered here via Recharts.
-                </p>
-            </div>
-        </div>
+      <div className="h-[300px] w-full p-4">
+        <ResponsiveContainer width="100%" height="100%">
+          {type === "line" ? (
+            <LineChart data={MOCK_DATA}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" />
+              <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: "hsl(var(--background))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
+                itemStyle={{ color: "hsl(var(--primary))" }}
+              />
+              <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+            </LineChart>
+          ) : type === "area" ? (
+            <AreaChart data={MOCK_DATA}>
+                <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip 
+                    contentStyle={{ backgroundColor: "hsl(var(--background))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
+                />
+                <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorValue)" />
+            </AreaChart>
+          ) : (
+            <BarChart data={MOCK_DATA}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" />
+              <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" />
+              <Tooltip 
+                contentStyle={{ backgroundColor: "hsl(var(--background))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
+              />
+              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          )}
+        </ResponsiveContainer>
       </div>
     </div>
   );
