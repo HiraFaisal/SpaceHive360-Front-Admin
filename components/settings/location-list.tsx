@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { 
   Card, 
   CardContent, 
@@ -42,6 +43,7 @@ interface LocationListProps {
 }
 
 export function LocationList({ refreshTrigger, onEdit, onAdd, searchTerm = "" }: LocationListProps) {
+  const router = useRouter();
   const [locations, setLocations] = useState<Location[]>([]);
   const [cities, setCities] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -206,7 +208,11 @@ export function LocationList({ refreshTrigger, onEdit, onAdd, searchTerm = "" }:
             </CardContent>
             
             <CardFooter className="px-6 pb-6 pt-2 shrink-0">
-                <Button variant="outline" className="w-full h-9 rounded-lg gap-2 text-xs font-semibold hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                <Button 
+                    variant="outline" 
+                    className="w-full h-9 rounded-lg gap-2 text-xs font-semibold hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+                    onClick={() => router.push(`/dashboard/workspaces/list?locationId=${loc.recId}`)}
+                >
                     <ExternalLink className="size-3.5" />
                     Explore Workspace
                 </Button>

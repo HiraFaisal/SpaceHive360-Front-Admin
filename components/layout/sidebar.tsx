@@ -22,6 +22,7 @@ import {
   List,
   ArrowLeft,
   Building2,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ const mainNavItems = [
     hasSubmenu: true,
     submenuId: "plans" 
   },
+  { href: "/dashboard/feedback", label: "Feedback", icon: MessageSquare },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { 
     href: "/dashboard/settings", 

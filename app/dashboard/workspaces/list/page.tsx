@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     Building2,
     Search,
@@ -33,14 +34,16 @@ import {
 } from "@/components/ui/dialog";
 import { WorkspaceSheet } from "@/components/workspaces/workspace-sheet";
 import { deleteWorkspace, getWorkspaces } from "@/lib/api/workspaces";
-import { useEffect } from "react";
 import { getWorkspaceTypes } from "@/lib/api/workspaceTypes";
 import { getLocations } from "@/lib/api/locations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 export default function WorkspaceListPage() {
+    const searchParams = useSearchParams();
+    const locationId = searchParams.get("locationId");
     const [searchTerm, setSearchTerm] = useState("");
+    
     const [workspaces, setWorkspaces] = useState<any[]>([]);
     const [types, setTypes] = useState<any[]>([]);
     const [locations, setLocations] = useState<any[]>([]);
@@ -78,6 +81,15 @@ export default function WorkspaceListPage() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (locationId && locations.length > 0) {
+            const location = locations.find(l => l.recId === locationId);
+            if (location) {
+                setSearchTerm(location.name);
+            }
+        }
+    }, [locationId, locations]);
 
     const refreshData = () => {
         fetchData();
