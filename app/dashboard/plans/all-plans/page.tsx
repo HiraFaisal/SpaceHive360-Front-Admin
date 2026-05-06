@@ -148,7 +148,7 @@ export default function AllPlansPage() {
         {[
           { title: "Total Plans", value: stats?.totalPlans?.toString() || "0", icon: Layers, color: "text-blue-500", bg: "bg-blue-500/10", hover: "hover:bg-blue-500 hover:border-blue-500" },
           { title: "Active Plans", value: stats?.activePlans?.toString() || "0", icon: FileText, color: "text-emerald-500", bg: "bg-emerald-500/10", hover: "hover:bg-emerald-500 hover:border-emerald-500" },
-          { title: "Avg. Price", value: stats ? `$${Math.round(stats.averagePrice)}` : "$0", icon: DollarSign, color: "text-amber-500", bg: "bg-amber-500/10", hover: "hover:bg-amber-500 hover:border-amber-500" },
+          { title: "Avg. Price", value: stats ? `Rs. ${Math.round(stats.averagePrice)}` : "Rs. 0", icon: DollarSign, color: "text-amber-500", bg: "bg-amber-500/10", hover: "hover:bg-amber-500 hover:border-amber-500" },
           { title: "New This Month", value: stats?.newPlansThisMonth?.toString() || "0", icon: Plus, color: "text-purple-500", bg: "bg-purple-500/10", hover: "hover:bg-purple-500 hover:border-purple-500" },
         ].map((stat, index) => (
           <div key={index} className={cn(

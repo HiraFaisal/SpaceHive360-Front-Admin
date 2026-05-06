@@ -160,7 +160,7 @@ export default function AllBookingPlansPage() {
         {[
           { title: "Total Plans", value: stats?.totalPlans?.toString() || "0", icon: Layers, color: "text-blue-500", bg: "bg-blue-500/10" },
           { title: "Active Plans", value: stats?.activePlans?.toString() || "0", icon: Clock, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-          { title: "Avg. Rate", value: stats ? `$${Math.round(stats.averagePrice)}` : "$0", icon: DollarSign, color: "text-amber-500", bg: "bg-amber-500/10" },
+          { title: "Avg. Rate", value: stats ? `Rs. ${Math.round(stats.averagePrice)}` : "Rs. 0", icon: DollarSign, color: "text-amber-500", bg: "bg-amber-500/10" },
           { title: "New This Month", value: stats?.newPlansThisMonth?.toString() || "0", icon: Plus, color: "text-purple-500", bg: "bg-purple-500/10" },
         ].map((stat, index) => (
           <div key={index} className="p-6 rounded-2xl border bg-card/60 backdrop-blur-xl shadow-sm transition-all duration-300 group">

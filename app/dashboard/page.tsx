@@ -53,7 +53,7 @@ export default function DashboardPage() {
           date: new Date(b.bookingDate).toLocaleDateString(),
           duration: b.planType,
           status: b.bookingStatus.toLowerCase(),
-          amount: `$${b.totalAmount}`
+          amount: `Rs. ${b.totalAmount}`
         })));
       }
     } catch (err) {
@@ -64,11 +64,18 @@ export default function DashboardPage() {
   };
 
   const statItems = [
-    { title: "Total Revenue", value: stats ? `$${stats.totalRevenue.toLocaleString()}` : "$0", icon: CreditCard, trend: "up" as const, trendValue: "+5.2%", description: "this month" },
+    { title: "Total Revenue", value: stats ? `Rs. ${stats.totalRevenue.toLocaleString()}` : "Rs. 0", icon: CreditCard, trend: "up" as const, trendValue: "+5.2%", description: "this month" },
     { title: "Active Members", value: stats ? stats.activeMembers.toString() : "0", icon: Users, trend: "up" as const, trendValue: "+12", description: "vs last month" },
     { title: "Bookings Today", value: stats ? stats.totalBookingsToday.toString() : "0", icon: Calendar, trend: "neutral" as const, trendValue: "", description: "Scheduled for today" },
-    { title: "Occupancy Rate", value: "82%", icon: Building2, trend: "up" as const, trendValue: "+1.8%", description: "vs last month" },
-    { title: "Unpaid Invoices", value: "$0", icon: AlertCircle, trend: "neutral" as const, trendValue: "Pending", description: "Needs attention" },
+    { 
+      title: "Occupancy Rate", 
+      value: stats?.occupancy ? `${stats.occupancy.percentage}%` : "0%", 
+      icon: Building2, 
+      trend: stats?.occupancy?.percentage > 70 ? "up" as const : "neutral" as const, 
+      trendValue: stats?.occupancy ? `${stats.occupancy.used}/${stats.occupancy.total}` : "", 
+      description: "Current utilization" 
+    },
+    { title: "Unpaid Invoices", value: "Rs. 0", icon: AlertCircle, trend: "neutral" as const, trendValue: "Pending", description: "Needs attention" },
     { title: "AI Insights", value: "3", icon: TrendingUp, trend: "neutral" as const, trendValue: "Alerts", description: "needing attention" },
   ];
 

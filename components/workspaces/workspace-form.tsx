@@ -26,6 +26,8 @@ const workspaceSchema = z.object({
   fkWorkspaceType: z.string().min(1, "Please select a workspace type"),
   capacity: z.number().min(1, "Capacity must be at least 1"),
   fkLocation: z.string().min(1, "Location is required"),
+  inventoryType: z.enum(["UNIT", "SEAT"]),
+  maxUnits: z.number().min(1, "Must be at least 1"),
   isActive: z.boolean(),
   isAvailable: z.boolean(),
   description: z.string().optional().default(""),
@@ -52,6 +54,8 @@ export function WorkspaceForm({ initialData, mode = "create", onSuccess, onCance
       fkWorkspaceType: initialData?.fkWorkspaceType ?? "",
       capacity: initialData?.capacity ?? 1,
       fkLocation: initialData?.fkLocation ?? "",
+      inventoryType: (initialData?.inventoryType as "UNIT" | "SEAT") ?? "UNIT",
+      maxUnits: initialData?.maxUnits ?? 1,
       isActive: initialData?.isActive ?? true,
       isAvailable: initialData?.isAvailable ?? true,
       description: initialData?.description ?? "",
@@ -133,6 +137,48 @@ export function WorkspaceForm({ initialData, mode = "create", onSuccess, onCance
           {form.formState.errors.fkWorkspaceType && (
             <p className="text-xs font-medium text-destructive mt-1">{form.formState.errors.fkWorkspaceType.message}</p>
           )}
+        </div>
+
+        {/* Inventory Type & Max Units */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="inventoryType" className="text-sm font-semibold">Inventory Type</Label>
+            <Select 
+              disabled={isViewOnly}
+              onValueChange={(value) => {
+                form.setValue("inventoryType", value as "UNIT" | "SEAT", { shouldValidate: true });
+                if (value === "UNIT") form.setValue("maxUnits", 1);
+              }} 
+              value={form.watch("inventoryType")}
+            >
+              <SelectTrigger className="h-11 bg-muted/30 border-muted-foreground/20 focus:ring-primary/30">
+                <SelectValue placeholder="Select inventory model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="UNIT">Unit (Whole Room)</SelectItem>
+                <SelectItem value="SEAT">Seat (Per Person)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground px-1">
+              {form.watch("inventoryType") === "UNIT" 
+                ? "Booked as a single entity (e.g. Office, Meeting Room)." 
+                : "Booked by individual seats (e.g. Hot Desks)."}
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxUnits" className="text-sm font-semibold">Max Units/Slots</Label>
+            <Input
+              id="maxUnits"
+              type="number"
+              disabled={isViewOnly || form.watch("inventoryType") === "UNIT"}
+              placeholder="1"
+              className="h-11 bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/30"
+              {...form.register("maxUnits", { valueAsNumber: true })}
+            />
+            {form.formState.errors.maxUnits && (
+              <p className="text-xs font-medium text-destructive mt-1">{form.formState.errors.maxUnits.message}</p>
+            )}
+          </div>
         </div>
 
         {/* Capacity & Status Grid */}

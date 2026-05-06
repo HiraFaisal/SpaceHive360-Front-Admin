@@ -48,9 +48,9 @@ export function BookingPricingCard({ data, updateData, errors, disabled }: Booki
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Price (USD)</Label>
+            <Label htmlFor="price">Price (PKR)</Label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+              <span className="absolute left-3 top-2.5 text-muted-foreground">Rs.</span>
               <Input
                 id="price"
                 type="number"

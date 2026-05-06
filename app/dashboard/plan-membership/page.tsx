@@ -22,6 +22,7 @@ export default function PlanMembershipPage() {
     aiRecommendation: true,
     tags: "Popular",
     image: null,
+    maxSlots: 0,
   });
 
   const updateData = (key: keyof PlanData, value: any) => {

@@ -23,6 +23,7 @@ import {
   ArrowLeft,
   Building2,
   MessageSquare,
+  BrainCircuit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,7 @@ const mainNavItems = [
 
 const supportNavItems = [
   { href: "/dashboard/support", label: "Support", icon: HelpCircle },
+  { href: "/dashboard/dynamic-pricing", label: "Dynamic Pricing", icon: BrainCircuit },
 ] as const;
 
 interface SidebarContentProps {
@@ -187,14 +189,27 @@ export function SidebarContent({
               Support
             </p>
             <ul className="space-y-0.5">
-              {supportNavItems.map(({ href, label, icon: Icon }) => {
-                const isActive =
-                  pathname === href || pathname.startsWith(href);
+              {supportNavItems.map(({ href, label, icon: Icon, ...rest }) => {
+                const isExternal = "isExternal" in rest && rest.isExternal;
+                const isActive = !isExternal && (pathname === href || pathname.startsWith(href));
+                
+                const handleLinkClick = (e: React.MouseEvent) => {
+                  if (isExternal) {
+                    e.preventDefault();
+                    const token = localStorage.getItem("token");
+                    const targetUrl = token ? `${href}?token=${token}` : href;
+                    window.open(targetUrl, "_blank");
+                  } else {
+                    onMobileClose?.();
+                  }
+                };
+
                 return (
                   <li key={href}>
                     <Link
                       href={href}
-                      onClick={onMobileClose}
+                      onClick={handleLinkClick}
+                      target={isExternal ? "_blank" : undefined}
                       className={cn(
                         "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                         isActive

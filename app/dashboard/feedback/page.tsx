@@ -28,7 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getFeedbacks, type Feedback } from "@/lib/api/feedback";
+import { getFeedbacks, getLocationSummary, summarizeReviews, type Feedback, type LocationSentimentSummary } from "@/lib/api/feedback";
 import { getLocations, type Location } from "@/lib/api/locations";
 import { getWorkspaces } from "@/lib/api/workspaces";
 import { toast } from "sonner";
@@ -43,7 +43,6 @@ import {
   SheetTitle, 
   SheetTrigger 
 } from "@/components/ui/sheet";
-import { getLocationSummary, type LocationSentimentSummary } from "@/lib/api/feedback";
 import { 
   AlertCircle, 
   CheckCircle2, 
@@ -77,7 +76,24 @@ export default function FeedbackPage() {
     if (!locationId) return;
     setLoadingSummary(true);
     try {
+      // 1. Get the base summary and feedbacks from backend
       const summary = await getLocationSummary(locationId);
+      
+      // 2. Get the actual feedback comments for this location
+      const locationFeedbacks = feedbacks.filter(f => f.fkLocation === locationId && f.comments);
+      const comments = locationFeedbacks.map(f => f.comments).slice(0, 10);
+      
+      if (comments.length > 0) {
+        // 3. Call AI Summarizer directly from Frontend
+        try {
+          const aiText = await summarizeReviews(comments);
+          summary.aiSummary = aiText;
+        } catch (aiErr) {
+          console.error("AI Summarization failed:", aiErr);
+          // Keep the backend placeholder if AI fails
+        }
+      }
+
       setLocSummary(summary);
     } catch (err) {
       console.error("Error fetching AI summary:", err);

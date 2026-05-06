@@ -39,18 +39,31 @@ export function PlanDetailsCard({ data, updateData }: PlanDetailsCardProps) {
           />
         </div>
         
-        <div className="space-y-2">
-            <Label htmlFor="planType">Plan Type</Label>
-            <Select value={data.type} onValueChange={(val) => updateData("type", val)}>
-                <SelectTrigger id="planType" className="bg-background/50">
-                    <SelectValue placeholder="Select plan type" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="hotDesk">Hot Desk</SelectItem>
-                    <SelectItem value="dedicatedDesk">Dedicated Desk</SelectItem>
-                    <SelectItem value="privateOffice">Private Office</SelectItem>
-                </SelectContent>
-            </Select>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+              <Label htmlFor="planType">Plan Type</Label>
+              <Select value={data.type} onValueChange={(val) => updateData("type", val)}>
+                  <SelectTrigger id="planType" className="bg-background/50">
+                      <SelectValue placeholder="Select plan type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="hotDesk">Hot Desk</SelectItem>
+                      <SelectItem value="dedicatedDesk">Dedicated Desk</SelectItem>
+                      <SelectItem value="privateOffice">Private Office</SelectItem>
+                  </SelectContent>
+              </Select>
+          </div>
+          <div className="space-y-2">
+              <Label htmlFor="maxSlots">Max Slots (0 for Unlimited)</Label>
+              <Input 
+                id="maxSlots" 
+                type="number"
+                placeholder="50" 
+                className="bg-background/50"
+                value={data.maxSlots}
+                onChange={(e) => updateData("maxSlots", parseInt(e.target.value) || 0)}
+              />
+          </div>
         </div>
 
         <div className="space-y-2">

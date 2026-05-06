@@ -27,7 +27,7 @@ export function PricingCard({ data, updateData }: PricingCardProps) {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="price">Monthly Price ($)</Label>
+            <Label htmlFor="price">Monthly Price (Rs.)</Label>
             <Input 
                 id="price" 
                 type="number" 

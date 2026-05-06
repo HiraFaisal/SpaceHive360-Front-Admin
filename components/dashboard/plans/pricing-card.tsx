@@ -70,7 +70,7 @@ export function PricingCard({ data, updateData, paymentTerms, errors }: PricingC
             <CardTitle className="text-xl font-bold mb-6">Pricing Details</CardTitle>
             <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="price" className="font-semibold">Price ($)</Label>
+                    <Label htmlFor="price" className="font-semibold">Price (Rs.)</Label>
                     <Input 
                         id="price" 
                         type="number" 

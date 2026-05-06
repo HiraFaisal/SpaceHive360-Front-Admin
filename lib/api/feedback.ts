@@ -1,5 +1,7 @@
-// lib/api/feedback.ts
+import axios from "axios";
 import api from "./axios";
+
+const AI_SERVICE_URL = "http://localhost:8000";
 
 export interface Feedback {
   recId: string;
@@ -40,4 +42,9 @@ export const getFeedbacks = async (recId?: string) => {
 export const getLocationSummary = async (locationId: string) => {
   const res = await api.get(`/api/feedback/location-summary/${locationId}`);
   return res.data as LocationSentimentSummary;
+};
+
+export const summarizeReviews = async (reviews: string[]) => {
+  const res = await axios.post(`${AI_SERVICE_URL}/summarize-feedback`, { reviews });
+  return res.data.summary as string;
 };

@@ -144,11 +144,11 @@ export function BookingForm({ onSuccess, onCancel }: BookingFormProps) {
         <div className="rounded-xl border bg-card/60 p-4 space-y-3 shadow-sm">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Hourly Rate</span>
-            <span className="font-medium">$12.00</span>
+            <span className="font-medium">Rs. 12.00</span>
           </div>
           <div className="flex items-center justify-between font-semibold border-t pt-3">
             <span>Total (8 Hours)</span>
-            <span className="text-primary text-lg">$96.00</span>
+            <span className="text-primary text-lg">Rs. 96.00</span>
           </div>
         </div>
         

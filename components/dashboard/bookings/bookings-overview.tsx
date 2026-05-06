@@ -34,8 +34,8 @@ const OVERVIEW_DATA = [
   },
   {
     title: "Total Revenue",
-    value: "$128,450",
-    badgeLabel: "+$4.2k today",
+    value: "Rs. 128,450",
+    badgeLabel: "+Rs. 4.2k today",
     icon: DollarSign,
     iconColor: "text-green-600 dark:text-green-400",
     iconBg: "bg-green-50 dark:bg-green-900/20",

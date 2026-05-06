@@ -9,4 +9,5 @@ export interface PlanData {
   aiRecommendation: boolean;
   tags: string;
   image: string | null;
+  maxSlots: number;
 }
