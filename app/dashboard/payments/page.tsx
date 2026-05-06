@@ -1,22 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  DollarSign,
   CreditCard,
-  AlertCircle,
   Search,
-  Filter,
-  MoreHorizontal,
   Download,
-  Send,
-  CheckCircle2,
-  Clock
+  Calendar,
+  User,
+  Loader2,
+  DollarSign,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight
 } from "lucide-react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,182 +24,155 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
-import { CreateInvoiceDialog } from "@/components/payments/create-invoice-dialog";
-import { NtpSettings } from "@/components/payments/ntp-settings";
 import { cn } from "@/lib/utils";
-
-// Mock Invoice Data
-const mockInvoices = [
-  { id: "INV-2024-001", user: "Alice Smith", date: "Oct 24, 2024", amount: "$550.00", status: "Paid", items: "Private Office (Pro-rata)" },
-  { id: "INV-2024-002", user: "Bob Jones", date: "Oct 25, 2024", amount: "$150.00", status: "Pending", items: "Hot Desk Monthly" },
-  { id: "INV-2024-003", user: "Charlie Brown", date: "Oct 26, 2024", amount: "$50.00", status: "Overdue", items: "Meeting Room (2hr)" },
-  { id: "INV-2024-004", user: "Diana Prince", date: "Oct 27, 2024", amount: "$1200.00", status: "Pending", items: "Event Hall Deposit" },
-  { id: "INV-2024-005", user: "Evan Wright", date: "Oct 20, 2024", amount: "$300.00", status: "Paid", items: "Dedicated Desk" },
-];
+import { bookingApi } from "@/lib/api/bookings";
 
 export default function PaymentsPage() {
-  const [activeTab, setActiveTab] = useState("invoices");
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const fetchPayments = async () => {
+    setLoading(true);
+    try {
+      const res = await bookingApi.getPayments();
+      if (res.success) {
+        setPayments(res.data.items);
+      }
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalRevenue = payments.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight">Payments & Billing</h1>
-          <p className="text-muted-foreground">Manage invoices, billing settings, and automated notices.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Payments</h1>
+          <p className="text-muted-foreground">Monitor revenue and transaction history.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline">Export Report</Button>
-          <CreateInvoiceDialog />
-        </div>
+        <Button variant="outline" className="gap-2">
+          <Download className="h-4 w-4" /> Export CSV
+        </Button>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$2,350.00</div>
-            <p className="text-xs text-muted-foreground">12 invoices pending</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">$50.00</div>
-            <p className="text-xs text-muted-foreground">1 invoice requires attention</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="rounded-lg bg-primary/10 p-2 text-primary">
+              <DollarSign className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+              <h3 className="text-2xl font-bold">${totalRevenue.toLocaleString()}</h3>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="rounded-lg bg-green-500/10 p-2 text-green-600">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Successful Payments</p>
+              <h3 className="text-2xl font-bold">{payments.length}</h3>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600">
+              <CreditCard className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Payment Provider</p>
+              <h3 className="text-2xl font-bold">Stripe Sandbox</h3>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Tabs defaultValue="invoices" onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="invoices">Invoices</TabsTrigger>
-          <TabsTrigger value="ntp">NTP Management</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-
-        {/* INVOICES TAB */}
-        <TabsContent value="invoices" className="space-y-4">
-          <div className="flex items-center gap-2 bg-card p-1 rounded-md border text-muted-foreground px-3 w-full sm:w-auto">
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+        <div className="p-4 border-b bg-muted/5 flex items-center justify-between">
+          <h3 className="font-semibold">Transaction History</h3>
+          <div className="flex items-center gap-2 bg-background p-1 rounded-md border text-muted-foreground px-3">
             <Search className="h-4 w-4" />
-            <input className="bg-transparent border-none focus:outline-none text-sm w-full sm:w-64" placeholder="Search invoices..." />
-            <Button variant="ghost" size="icon" className="h-8 w-8 ml-auto">
-              <Filter className="h-4 w-4" />
-            </Button>
+            <input 
+                className="bg-transparent border-none focus:outline-none text-sm w-48" 
+                placeholder="Search transactions..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
+        </div>
 
-          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="w-[50px]"><Checkbox /></TableHead>
-                  <TableHead>Invoice ID</TableHead>
-                  <TableHead>Member</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            <p className="text-muted-foreground">Loading transactions...</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead>Customer</TableHead>
+                <TableHead>Plan</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Stripe ID</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {payments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                    No transactions found.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockInvoices.map((inv) => (
-                  <TableRow key={inv.id} className="group">
-                    <TableCell><Checkbox /></TableCell>
-                    <TableCell className="font-medium">{inv.id}</TableCell>
+              ) : (
+                payments.map((payment) => (
+                  <TableRow key={payment.recId} className="group hover:bg-muted/5 transition-colors">
                     <TableCell>
-                      <div className="flex flex-col">
-                        <span>{inv.user}</span>
-                        <span className="text-xs text-muted-foreground">{inv.items}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <span className="font-medium">{payment.memberName}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{inv.amount}</TableCell>
                     <TableCell>
-                      <span className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                        inv.status === 'Paid' ? 'bg-green-50 text-green-700 ring-green-600/20' :
-                          inv.status === 'Pending' ? 'bg-yellow-50 text-yellow-700 ring-yellow-600/20' :
-                            'bg-red-50 text-red-700 ring-red-600/20'
-                      )}>
-                        {inv.status === 'Paid' && <CheckCircle2 className="h-3 w-3" />}
-                        {inv.status === 'Pending' && <Clock className="h-3 w-3" />}
-                        {inv.status === 'Overdue' && <AlertCircle className="h-3 w-3" />}
-                        {inv.status}
-                      </span>
+                      <span className="text-sm">{payment.planName}</span>
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{inv.date}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem><Download className="h-4 w-4 mr-2" /> Download PDF</DropdownMenuItem>
-                          <DropdownMenuItem><Send className="h-4 w-4 mr-2" /> Resend NTP</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">Void Invoice</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <TableCell>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {format(new Date(payment.bookingDate), 'MMM d, yyyy')}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <code className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground font-mono">
+                        {payment.paymentId || "N/A"}
+                      </code>
+                    </TableCell>
+                    <TableCell className="text-right font-bold text-green-600">
+                      +${payment.totalAmount?.toLocaleString()}
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-
-        {/* NTP MANAGEMENT TAB */}
-        <TabsContent value="ntp" className="space-y-4">
-          <div className="flex flex-col gap-2 mb-4">
-            <h2 className="text-lg font-semibold">Automated Notices</h2>
-            <p className="text-sm text-muted-foreground">Configure when and how "Notice to Pay" reminders are sent to members.</p>
-          </div>
-          <NtpSettings />
-        </TabsContent>
-
-        {/* SETTINGS TAB */}
-        <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tax & Currency Settings</CardTitle>
-              <CardDescription>Manage global billing preferences.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm text-muted-foreground">
-              <p>Default Currency: USD ($)</p>
-              <p>Tax Rate: 10% (VAT)</p>
-              <p>Use Sequential Invoice Numbering: Yes</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div >
+                ))
+              )}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </div>
   );
 }

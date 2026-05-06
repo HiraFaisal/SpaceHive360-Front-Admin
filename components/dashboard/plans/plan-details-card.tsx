@@ -15,51 +15,77 @@ import {
 import { UploadCloud } from "lucide-react";
 import { PlanData } from "@/app/dashboard/plans/page";
 
+import { FieldErrors } from "react-hook-form";
+
 interface PlanDetailsCardProps {
   data: PlanData;
   updateData: (key: keyof PlanData, value: any) => void;
+  workspaces: any[];
+  workspaceTypes: any[];
+  locations: any[];
+  errors: FieldErrors<PlanData>;
 }
 
-export function PlanDetailsCard({ data, updateData }: PlanDetailsCardProps) {
-  return (
-    <Card className="border-border/5 bg-card">
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">Plan Details</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="planName">Plan Name</Label>
-          <Input 
-            id="planName" 
-            placeholder="e.g. Professional Plan" 
-            className="bg-background/50"
-            value={data.name}
-            onChange={(e) => updateData("name", e.target.value)}
-          />
-        </div>
-        
-        <div className="space-y-2">
-            <Label htmlFor="planType">Plan Type</Label>
-            <Select value={data.type} onValueChange={(val) => updateData("type", val)}>
-                <SelectTrigger id="planType" className="bg-background/50">
-                    <SelectValue placeholder="Select plan type" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="hotDesk">Hot Desk</SelectItem>
-                    <SelectItem value="dedicatedDesk">Dedicated Desk</SelectItem>
-                    <SelectItem value="privateOffice">Private Office</SelectItem>
-                </SelectContent>
-            </Select>
-        </div>
+export function PlanDetailsCard({ data, updateData, workspaces, workspaceTypes, errors }: PlanDetailsCardProps) {
+  const handleWorkspaceChange = (workspaceId: string) => {
+    const selectedWorkspace = workspaces.find(w => w.recId === workspaceId);
+    console.log("Selected Workspace:", selectedWorkspace);
+    
+    if (selectedWorkspace) {
+      updateData("fkWorkspace", workspaceId);
+      
+      // Extract properties (checking all possible casings for robustness)
+      const locationId = selectedWorkspace.fkLocation || 
+                         selectedWorkspace.fk_location || 
+                         selectedWorkspace.FkLocation || "";
+                         
+      const companyId = selectedWorkspace.fkCompany || 
+                        selectedWorkspace.fk_company || 
+                        selectedWorkspace.FkCompany || "";
+                        
+      const typeId = selectedWorkspace.fkWorkspaceType || 
+                     selectedWorkspace.fk_workspace_type || 
+                     selectedWorkspace.FkWorkspaceType || "";
 
-        <div className="space-y-2">
-            <Label>Plan Images</Label>
-            <div className="border-2 border-dashed border-border/10 rounded-lg p-8 flex flex-col items-center justify-center text-center hover:bg-muted/5 transition-colors cursor-pointer bg-background/20">
-                <div className="bg-primary/10 p-3 rounded-full mb-3">
-                    <UploadCloud className="h-6 w-6 text-primary" />
-                </div>
-                <p className="text-sm font-medium">Click to upload or drag and drop</p>
-                <p className="text-xs text-muted-foreground mt-1">SVG, PNG, JPG (REC. 800x600px)</p>
+      console.log("Derived Values:", { locationId, companyId, typeId });
+
+      // Automatically derive associated fields
+      updateData("fkWorkspaceType", typeId);
+      updateData("fkLocation", locationId);
+      updateData("fkCompany", companyId);
+    }
+  };
+
+  return (
+    <Card className="border-border/5 bg-card overflow-hidden shadow-sm">
+      <CardHeader className="border-b border-border/5 bg-muted/20">
+        <CardTitle className="text-xl font-bold">General Information</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6 pt-6">
+        <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+                <Label htmlFor="planName">Plan Name</Label>
+                <Input 
+                    id="planName" 
+                    placeholder="e.g. Professional Plan" 
+                    className="bg-background/50"
+                    value={data.name}
+                    onChange={(e) => updateData("name", e.target.value)}
+                />
+                {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="planCategory">Plan Category</Label>
+                <Select value={data.planCategory} onValueChange={(val) => updateData("planCategory", val)}>
+                    <SelectTrigger id="planCategory" className="bg-background/50">
+                        <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="membership">Membership</SelectItem>
+                        <SelectItem value="hot-desk">Hot Desk</SelectItem>
+                        <SelectItem value="private-office">Private Office</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
         </div>
 
@@ -72,6 +98,46 @@ export function PlanDetailsCard({ data, updateData }: PlanDetailsCardProps) {
             value={data.description}
             onChange={(e) => updateData("description", e.target.value)}
           />
+          {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
+        </div>
+
+        <div className="border-t border-border/5 pt-6 mt-6">
+            <CardTitle className="text-xl font-bold mb-6">Workspace Configuration</CardTitle>
+            <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label htmlFor="workspaceType">Workspace Type</Label>
+                    <Select value={data.fkWorkspaceType} onValueChange={(val) => updateData("fkWorkspaceType", val)}>
+                        <SelectTrigger id="workspaceType" className="bg-background/50">
+                            <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {workspaceTypes.map((type) => (
+                                <SelectItem key={type.recId} value={type.recId}>
+                                    {type.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {errors.fkWorkspaceType && <p className="text-xs text-destructive">{errors.fkWorkspaceType.message}</p>}
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="workspace">Workspace</Label>
+                    <Select value={data.fkWorkspace} onValueChange={handleWorkspaceChange}>
+                        <SelectTrigger id="workspace" className="bg-background/50">
+                            <SelectValue placeholder="Select workspace" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {workspaces.map((ws) => (
+                                <SelectItem key={ws.recId} value={ws.recId}>
+                                    {ws.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {errors.fkWorkspace && <p className="text-xs text-destructive">{errors.fkWorkspace.message}</p>}
+                </div>
+            </div>
         </div>
       </CardContent>
     </Card>

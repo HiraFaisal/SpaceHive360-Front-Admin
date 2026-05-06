@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Briefcase,
@@ -16,8 +17,13 @@ import {
   Menu,
   User,
   GalleryVerticalEnd,
-  Sparkles,
   FileText,
+  Plus,
+  List,
+  ArrowLeft,
+  Building2,
+  MessageSquare,
+  BrainCircuit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,13 +33,35 @@ const mainNavItems = [
   { href: "/dashboard/workspaces", label: "Workspaces", icon: Briefcase },
   { href: "/dashboard/community", label: "Community", icon: Users },
   { href: "/dashboard/bookings", label: "Bookings", icon: Calendar },
-  { href: "/dashboard/plans", label: "Plans", icon: FileText },
+  { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
+  { 
+    href: "/dashboard/booking-management", 
+    label: "Booking Mgmt", 
+    icon: GalleryVerticalEnd,
+    hasSubmenu: true,
+    submenuId: "booking"
+  },
+  { 
+    href: "/dashboard/plans", 
+    label: "Plans", 
+    icon: FileText,
+    hasSubmenu: true,
+    submenuId: "plans" 
+  },
+  { href: "/dashboard/feedback", label: "Feedback", icon: MessageSquare },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { 
+    href: "/dashboard/settings", 
+    label: "Settings", 
+    icon: Settings,
+    hasSubmenu: true,
+    submenuId: "settings"
+  },
 ] as const;
 
 const supportNavItems = [
   { href: "/dashboard/support", label: "Support", icon: HelpCircle },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/dynamic-pricing", label: "Dynamic Pricing", icon: BrainCircuit },
 ] as const;
 
 interface SidebarContentProps {
@@ -52,6 +80,7 @@ export function SidebarContent({
   showToggle = false,
 }: SidebarContentProps) {
   const pathname = usePathname();
+  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
@@ -100,52 +129,57 @@ export function SidebarContent({
         )}
       </div>
 
-      {/* AI status indicator */}
-      {!isCollapsed && (
-        <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl bg-primary/5 px-3 py-2.5 ring-1 ring-primary/10 transition-all duration-200">
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-            <Sparkles className="size-3.5 text-primary" />
-          </div>
-          <p className="truncate text-xs font-medium text-foreground/90">
-            AI Optimizing Space Utilization
-          </p>
-        </div>
-      )}
-      {isCollapsed && (
-        <div className="mx-2 mt-3 flex justify-center">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/5 ring-1 ring-primary/10" title="AI Optimizing Space Utilization">
-            <Sparkles className="size-4 text-primary" />
-          </div>
-        </div>
-      )}
 
       {/* Navigation - grouped */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4">
-        <div className="space-y-6">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 relative">
+        {/* Main Menu */}
+        <div className={cn(
+          "space-y-6 transition-all duration-300",
+          activeSubmenu && "-translate-x-full opacity-0 pointer-events-none"
+        )}>
           <ul className="space-y-0.5">
-            {mainNavItems.map(({ href, label, icon: Icon }) => {
+            {mainNavItems.map((item) => {
+              const { href, label, icon: Icon } = item;
+              const hasSubmenu = "hasSubmenu" in item && item.hasSubmenu;
+              const submenuId = "submenuId" in item ? item.submenuId : null;
+              
               const isActive =
                 pathname === href ||
                 (href !== "/dashboard" && pathname.startsWith(href));
+              
+              const content = (
+                <div className={cn(
+                  "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
+                  isActive
+                    ? "bg-secondary text-foreground shadow-sm"
+                    : "text-muted-foreground hover:-translate-y-px hover:bg-secondary/50 hover:text-foreground hover:shadow-sm",
+                  isCollapsed && "lg:justify-center lg:px-2"
+                )}>
+                  {isActive && (
+                    <span className="absolute left-2 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
+                  )}
+                  <Icon className={cn("size-5 shrink-0 transition-colors duration-200", isActive && "text-primary")} />
+                  {!isCollapsed && <span className="truncate">{label}</span>}
+                  {!isCollapsed && hasSubmenu && (
+                    <ChevronLeft className="ml-auto size-4 -rotate-180 text-muted-foreground/50 group-hover:text-foreground" />
+                  )}
+                </div>
+              );
+
               return (
                 <li key={href}>
-                  <Link
-                    href={href}
-                    onClick={onMobileClose}
-                    className={cn(
-                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-secondary text-foreground shadow-sm"
-                        : "text-muted-foreground hover:-translate-y-px hover:bg-secondary/50 hover:text-foreground hover:shadow-sm",
-                      isCollapsed && "lg:justify-center lg:px-2"
-                    )}
-                  >
-                    {isActive && (
-                      <span className="absolute left-2 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
-                    )}
-                    <Icon className={cn("size-5 shrink-0 transition-colors duration-200", isActive && "text-primary")} />
-                    {!isCollapsed && <span className="truncate">{label}</span>}
-                  </Link>
+                  {hasSubmenu && !isCollapsed ? (
+                    <button 
+                      onClick={() => setActiveSubmenu(submenuId)}
+                      className="w-full text-left"
+                    >
+                      {content}
+                    </button>
+                  ) : (
+                    <Link href={href} onClick={onMobileClose}>
+                      {content}
+                    </Link>
+                  )}
                 </li>
               );
             })}
@@ -155,14 +189,27 @@ export function SidebarContent({
               Support
             </p>
             <ul className="space-y-0.5">
-              {supportNavItems.map(({ href, label, icon: Icon }) => {
-                const isActive =
-                  pathname === href || pathname.startsWith(href);
+              {supportNavItems.map(({ href, label, icon: Icon, ...rest }) => {
+                const isExternal = "isExternal" in rest && rest.isExternal;
+                const isActive = !isExternal && (pathname === href || pathname.startsWith(href));
+                
+                const handleLinkClick = (e: React.MouseEvent) => {
+                  if (isExternal) {
+                    e.preventDefault();
+                    const token = localStorage.getItem("token");
+                    const targetUrl = token ? `${href}?token=${token}` : href;
+                    window.open(targetUrl, "_blank");
+                  } else {
+                    onMobileClose?.();
+                  }
+                };
+
                 return (
                   <li key={href}>
                     <Link
                       href={href}
-                      onClick={onMobileClose}
+                      onClick={handleLinkClick}
+                      target={isExternal ? "_blank" : undefined}
                       className={cn(
                         "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                         isActive
@@ -183,6 +230,191 @@ export function SidebarContent({
             </ul>
           </div>
         </div>
+
+        {/* Secondary Submenu Panel */}
+        {activeSubmenu === "plans" && (
+          <div className="absolute inset-0 px-3 py-4 space-y-6 animate-in slide-in-from-right duration-300">
+            <div className="space-y-4">
+              <button 
+                onClick={() => setActiveSubmenu(null)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-primary transition-colors group"
+              >
+                <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+                <span>Back</span>
+              </button>
+              
+              <div className="px-3">
+                <h3 className="text-lg font-bold tracking-tight">Plans</h3>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1">Management</p>
+              </div>
+
+              <ul className="space-y-0.5">
+                <li>
+                  <Link
+                    href="/dashboard/plans"
+                    onClick={onMobileClose}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      pathname === "/dashboard/plans"
+                        ? "bg-secondary text-foreground shadow-sm"
+                        : "text-muted-foreground hover:-translate-y-px hover:bg-secondary/50 hover:text-foreground hover:shadow-sm"
+                    )}
+                  >
+                    {pathname === "/dashboard/plans" && (
+                      <span className="absolute left-2 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
+                    )}
+                    <Plus className={cn("size-5 shrink-0 transition-colors duration-200", pathname === "/dashboard/plans" && "text-primary")} />
+                    <span className="truncate">Create Plan</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/plans/all-plans"
+                    onClick={onMobileClose}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      pathname === "/dashboard/plans/all-plans"
+                        ? "bg-secondary text-foreground shadow-sm"
+                        : "text-muted-foreground hover:-translate-y-px hover:bg-secondary/50 hover:text-foreground hover:shadow-sm"
+                    )}
+                  >
+                    {pathname === "/dashboard/plans/all-plans" && (
+                      <span className="absolute left-2 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
+                    )}
+                    <List className={cn("size-5 shrink-0 transition-colors duration-200", pathname === "/dashboard/plans/all-plans" && "text-primary")} />
+                    <span className="truncate">All Plans</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="px-3 pt-4 border-t border-sidebar-border/50">
+              <div className="rounded-xl bg-primary/5 p-4 border border-primary/10">
+                <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Pro Tip</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Use "All Plans" to quickly duplicate or update existing pricing structures.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Secondary Submenu Panel - Booking Management */}
+        {activeSubmenu === "booking" && (
+          <div className="absolute inset-0 px-3 py-4 space-y-6 animate-in slide-in-from-right duration-300">
+            <div className="space-y-4">
+              <button 
+                onClick={() => setActiveSubmenu(null)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-primary transition-colors group"
+              >
+                <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+                <span>Back</span>
+              </button>
+              
+              <div className="px-3">
+                <h3 className="text-lg font-bold tracking-tight">Booking Mgmt</h3>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1">On-Demand</p>
+              </div>
+
+              <ul className="space-y-0.5">
+                <li>
+                  <Link
+                    href="/dashboard/booking-management"
+                    onClick={onMobileClose}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      pathname === "/dashboard/booking-management"
+                        ? "bg-secondary text-foreground shadow-sm"
+                        : "text-muted-foreground hover:-translate-y-px hover:bg-secondary/50 hover:text-foreground hover:shadow-sm"
+                    )}
+                  >
+                    {pathname === "/dashboard/booking-management" && (
+                      <span className="absolute left-2 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
+                    )}
+                    <Plus className={cn("size-5 shrink-0 transition-colors duration-200", pathname === "/dashboard/booking-management" && "text-primary")} />
+                    <span className="truncate">Create Booking Plan</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/booking-management/all"
+                    onClick={onMobileClose}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      pathname === "/dashboard/booking-management/all"
+                        ? "bg-secondary text-foreground shadow-sm"
+                        : "text-muted-foreground hover:-translate-y-px hover:bg-secondary/50 hover:text-foreground hover:shadow-sm"
+                    )}
+                  >
+                    {pathname === "/dashboard/booking-management/all" && (
+                      <span className="absolute left-2 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
+                    )}
+                    <List className={cn("size-5 shrink-0 transition-colors duration-200", pathname === "/dashboard/booking-management/all" && "text-primary")} />
+                    <span className="truncate">All Booking Plans</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="px-3 pt-4 border-t border-sidebar-border/50">
+              <div className="rounded-xl bg-primary/5 p-4 border border-primary/10">
+                <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Smart Tip</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Booking plans are best for meeting rooms and hourly hot-desks.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Secondary Submenu Panel - Settings */}
+        {activeSubmenu === "settings" && (
+          <div className="absolute inset-0 px-3 py-4 space-y-6 animate-in slide-in-from-right duration-300">
+            <div className="space-y-4">
+              <button 
+                onClick={() => setActiveSubmenu(null)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-primary transition-colors group"
+              >
+                <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+                <span>Back</span>
+              </button>
+              
+              <div className="px-3">
+                <h3 className="text-lg font-bold tracking-tight">Settings</h3>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1">Configuration</p>
+              </div>
+
+              <ul className="space-y-0.5">
+                <li>
+                  <Link
+                    href="/dashboard/settings/locations"
+                    onClick={onMobileClose}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      pathname.startsWith("/dashboard/settings/locations")
+                        ? "bg-secondary text-foreground shadow-sm"
+                        : "text-muted-foreground hover:-translate-y-px hover:bg-secondary/50 hover:text-foreground hover:shadow-sm"
+                    )}
+                  >
+                    {pathname.startsWith("/dashboard/settings/locations") && (
+                      <span className="absolute left-2 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
+                    )}
+                    <Building2 className={cn("size-5 shrink-0 transition-colors duration-200", pathname.startsWith("/dashboard/settings/locations") && "text-primary")} />
+                    <span className="truncate">Locations</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="px-3 pt-4 border-t border-sidebar-border/50">
+              <div className="rounded-xl bg-primary/5 p-4 border border-primary/10">
+                <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Notice</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Locations are used to group workspaces and plans.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* User section */}
