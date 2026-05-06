@@ -1,4 +1,6 @@
+"use client";
 import { GalleryVerticalEnd } from "lucide-react"
+
 import { CompanyRegistrationForm } from "@/components/company-registration-form"
 
 export default function RegisterPage() {

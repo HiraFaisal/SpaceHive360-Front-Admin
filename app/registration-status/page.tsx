@@ -1,4 +1,6 @@
+"use client";
 import { GalleryVerticalEnd } from "lucide-react"
+
 import { CompanyStatusCheck } from "@/components/company-status-check"
 
 export default function RegistrationStatusPage() {

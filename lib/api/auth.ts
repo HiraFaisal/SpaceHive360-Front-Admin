@@ -14,8 +14,9 @@ export const login = async (data: LoginRequest): Promise<string> => {
   try {
     const response = await api.post(`api/auth/login`, data);
 
-    // The backend returns { token: "...", expiration: "..." }
-    return response.data.token;
+    // Handle both cases: response.data being the token string itself OR an object with a token property
+    return typeof response.data === 'string' ? response.data : response.data.token;
+
   } catch (err: any) {
     let message = "Login failed";
 
