@@ -12,7 +12,8 @@ export interface LoginResponse {
 
 export const login = async (data: LoginRequest): Promise<string> => {
   try {
-    const response = await api.post(`/api/auth/login`, data);
+    const response = await api.post(`api/auth/login`, data);
+
     // The backend returns { token: "...", expiration: "..." }
     return response.data.token;
   } catch (err: any) {
