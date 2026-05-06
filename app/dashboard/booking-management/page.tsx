@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ChevronRight, Save, Trash2, X } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { getWorkspaces } from "@/lib/api/workspaces";
 import { getWorkspaceTypes } from "@/lib/api/workspaceTypes";
@@ -47,7 +47,7 @@ const bookingSchema = z.object({
 
 export type BookingData = z.infer<typeof bookingSchema>;
 
-export default function BookingManagementPage() {
+function BookingManagementContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const bookingId = searchParams.get("id");
@@ -276,5 +276,13 @@ export default function BookingManagementPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BookingManagementPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <BookingManagementContent />
+    </Suspense>
   );
 }

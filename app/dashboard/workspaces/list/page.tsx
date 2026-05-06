@@ -39,7 +39,9 @@ import { getLocations } from "@/lib/api/locations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
-export default function WorkspaceListPage() {
+import { Suspense } from "react";
+
+function WorkspaceListContent() {
     const searchParams = useSearchParams();
     const locationId = searchParams.get("locationId");
     const [searchTerm, setSearchTerm] = useState("");
@@ -330,5 +332,13 @@ export default function WorkspaceListPage() {
                 </DialogContent>
             </Dialog>
         </div>
+    );
+}
+
+export default function WorkspaceListPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+            <WorkspaceListContent />
+        </Suspense>
     );
 }

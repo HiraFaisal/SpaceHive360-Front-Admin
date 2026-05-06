@@ -36,6 +36,10 @@ export function BookingFeaturesCard({ data, updateData, errors, disabled }: Book
     }
   };
 
+  const removeImage = (index: number) => {
+    updateData("images", (data.images || []).filter((_, i) => i !== index));
+  };
+
   const getImageUrl = (image: any) => {
     if (image instanceof File) {
       return URL.createObjectURL(image);

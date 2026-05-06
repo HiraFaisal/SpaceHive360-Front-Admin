@@ -49,7 +49,9 @@ import Link from "next/link";
 
 import { toast } from "sonner";
 
-export default function PlansPage() {
+import { Suspense } from "react";
+
+function PlansContent() {
   const searchParams = useSearchParams();
   const planId = searchParams.get("id");
   const isEdit = searchParams.get("edit") === "true";
@@ -255,5 +257,13 @@ export default function PlansPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PlansPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <PlansContent />
+    </Suspense>
   );
 }

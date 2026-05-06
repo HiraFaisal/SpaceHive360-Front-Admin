@@ -38,9 +38,9 @@ const locationSchema = z.object({
   name: z.string().min(2, "Location name is required"),
   fkCity: z.string().optional(), // Will be auto-filled
   address: z.string().min(5, "Full address is required"),
-  latitude: z.number({ required_error: "Please pick a location on the map" }),
-  longitude: z.number({ required_error: "Please pick a location on the map" }),
-  isActive: z.boolean().default(true),
+  latitude: z.number({ message: "Please pick a location on the map" }).optional(),
+  longitude: z.number({ message: "Please pick a location on the map" }).optional(),
+  isActive: z.boolean().optional(),
 });
 
 type LocationFormValues = z.infer<typeof locationSchema>;
