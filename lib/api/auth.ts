@@ -1,7 +1,5 @@
 // lib/api/auth.ts
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import api from "./axios";
 
 interface LoginRequest {
   email: string;
@@ -14,11 +12,9 @@ export interface LoginResponse {
 
 export const login = async (data: LoginRequest): Promise<string> => {
   try {
-    const response = await axios.post(`${API_URL}/api/auth/login`, data, {
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await api.post(`/api/auth/login`, data);
     // The backend returns { token: "...", expiration: "..." }
-    return response.data;
+    return response.data.token;
   } catch (err: any) {
     let message = "Login failed";
 
