@@ -51,14 +51,14 @@ export function CompanyStatusCheck({ className, ...props }: React.ComponentProps
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-3xl font-bold">Check Application Status</h1>
-          <p className="text-muted-foreground text-sm text-balance">
-            Enter your business email to track your registration progress.
+        <div className="flex flex-col items-center gap-1 text-center mb-4">
+          <h1 className="text-4xl font-bold tracking-tight text-primary">Application Status</h1>
+          <p className="text-muted-foreground text-sm text-balance max-w-sm">
+            Track your journey with SpaceHive360. Enter your business email below.
           </p>
         </div>
 
-        <form onSubmit={handleCheckStatus} className="flex gap-2">
+        <form onSubmit={handleCheckStatus} className="flex gap-3">
           <div className="flex-1">
             <Input
               placeholder="admin@creativehub.com"
@@ -66,65 +66,66 @@ export function CompanyStatusCheck({ className, ...props }: React.ComponentProps
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-11"
+              className="h-12 text-base shadow-sm"
             />
           </div>
-          <Button type="submit" disabled={loading} size="icon" className="h-11 w-11 shrink-0">
-            {loading ? <Loader2 className="animate-spin size-4" /> : <Search className="size-4" />}
+          <Button type="submit" disabled={loading} size="icon" className="h-12 w-12 shrink-0 shadow-lg shadow-primary/20 transition-all active:scale-95">
+            {loading ? <Loader2 className="animate-spin size-5" /> : <Search className="size-5" />}
           </Button>
         </form>
 
         {error && (
-          <div className="p-4 rounded-lg bg-destructive/5 text-destructive text-sm text-center border border-destructive/10">
+          <div className="p-4 rounded-xl bg-destructive/5 text-destructive text-sm text-center border border-destructive/10 animate-in fade-in slide-in-from-top-1 duration-200">
             {error}
           </div>
         )}
 
         {statusData && (
-          <div className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/5 text-primary">
-                  <Building2 size={24} />
+          <div className="p-6 rounded-2xl border bg-card/50 backdrop-blur-sm text-card-foreground shadow-xl shadow-primary/5 animate-fade-in-up">
+            <div className="flex items-start justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-primary/10 text-primary shadow-inner">
+                  <Building2 size={28} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg leading-none">{statusData.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Application Summary</p>
+                  <h3 className="font-bold text-xl tracking-tight leading-none">{statusData.name}</h3>
+                  <p className="text-xs font-semibold text-muted-foreground mt-2 uppercase tracking-widest">Business Account</p>
                 </div>
               </div>
-              <Badge className={cn("px-3 py-1 text-xs", statusColors[statusData.registrationStatus as keyof typeof statusColors] || "")}>
+              <Badge className={cn("px-4 py-1.5 text-xs font-bold rounded-full shadow-sm", statusColors[statusData.registrationStatus as keyof typeof statusColors] || "")}>
                 {statusData.registrationStatus}
               </Badge>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 text-sm">
-                <Calendar className="size-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Applied on:</span>
-                <span className="font-medium">{new Date(statusData.createdAt).toLocaleDateString()}</span>
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 text-sm bg-muted/30 p-3 rounded-lg">
+                <Calendar className="size-4 text-primary" />
+                <span className="text-muted-foreground">Application Date:</span>
+                <span className="font-bold ml-auto">{new Date(statusData.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
               </div>
 
               {statusData.adminComments && (
-                <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-muted-foreground/10">
-                  <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="mt-6 p-5 rounded-xl bg-primary/[0.03] border border-primary/10 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-primary/40" />
+                  <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-primary/60 uppercase tracking-[0.2em]">
                     <MessageSquare size={12} />
-                    Admin Feedback
+                    Official Feedback
                   </div>
-                  <p className="text-sm italic">{statusData.adminComments}</p>
+                  <p className="text-sm italic text-foreground/80 leading-relaxed">&ldquo;{statusData.adminComments}&rdquo;</p>
                 </div>
               )}
             </div>
 
             {statusData.registrationStatus === "Approved" && (
-              <Button asChild className="w-full mt-6">
-                <Link href="/login">Proceed to Login</Link>
+              <Button asChild className="w-full mt-8 h-12 text-base font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Link href="/login">Proceed to Dashboard</Link>
               </Button>
             )}
           </div>
         )}
 
-        <div className="text-center pt-4 border-t">
-          <Button variant="ghost" asChild className="text-muted-foreground">
+        <div className="text-center pt-6 mt-2 border-t border-primary/10">
+          <Button variant="ghost" asChild className="text-muted-foreground hover:text-primary hover:bg-primary/5 font-medium">
             <Link href="/register">
               <ChevronLeft className="mr-2 size-4" /> Back to Registration
             </Link>

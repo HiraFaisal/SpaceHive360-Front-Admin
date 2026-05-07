@@ -35,3 +35,30 @@ export const login = async (data: LoginRequest): Promise<string> => {
     throw new Error(message);
   }
 };
+
+export const forgotPassword = async (email: string) => {
+  try {
+    const response = await api.post("api/auth/forgot-password", { email });
+    return response.data;
+  } catch (err: any) {
+    throw new Error(err.response?.data?.message || "Failed to request password reset");
+  }
+};
+
+export const verifyResetCode = async (email: string, code: string) => {
+  try {
+    const response = await api.post("api/auth/verify-reset-code", { email, code });
+    return response.data;
+  } catch (err: any) {
+    throw new Error(err.response?.data?.message || "Invalid reset code");
+  }
+};
+
+export const resetPassword = async (data: any) => {
+  try {
+    const response = await api.post("api/auth/reset-password", data);
+    return response.data;
+  } catch (err: any) {
+    throw new Error(err.response?.data?.message || "Failed to reset password");
+  }
+};

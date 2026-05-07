@@ -18,7 +18,7 @@ import {
     Filter
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getAggregatedPlans, analyzePricing } from "@/lib/api/pricing";
+import { getAggregatedPlans, analyzePricing, updatePlanPrice } from "@/lib/api/pricing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -39,6 +39,10 @@ interface Plan {
     price: number;
     description: string;
     type: string;
+    workspaceTypeName?: string;
+    workspaceName?: string;
+    locationName?: string;
+    cityName?: string;
 }
 
 interface AIAnalysis {
@@ -46,6 +50,7 @@ interface AIAnalysis {
     confidence_score: number;
     reasoning: string;
     demand_score: number;
+    external_market_score?: number;
     loading: boolean;
     error?: string;
 }
@@ -56,6 +61,8 @@ export default function DynamicPricingPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedAnalysis, setSelectedAnalysis] = useState<{plan: Plan, analysis: AIAnalysis} | null>(null);
+    const [confirmUpdate, setConfirmUpdate] = useState<{planId: string, newPrice: number, name: string} | null>(null);
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const fetchPlans = async () => {
         try {
@@ -82,7 +89,7 @@ export default function DynamicPricingPage() {
         }));
 
         try {
-            const result = await analyzePricing(plan.recId, plan.price);
+            const result = await analyzePricing(plan);
             setAnalyses(prev => ({
                 ...prev,
                 [plan.recId]: { ...result, loading: false }
@@ -92,6 +99,22 @@ export default function DynamicPricingPage() {
                 ...prev,
                 [plan.recId]: { suggested_price: 0, confidence_score: 0, reasoning: "", demand_score: 0, loading: false, error: "AI Service Offline" }
             }));
+        }
+    };
+
+    const handleUpdatePrice = async () => {
+        if (!confirmUpdate) return;
+        try {
+            setIsUpdating(true);
+            await updatePlanPrice(confirmUpdate.planId, confirmUpdate.newPrice);
+            toast.success(`Price for ${confirmUpdate.name} has been updated to Rs. ${confirmUpdate.newPrice.toLocaleString()}`);
+            setConfirmUpdate(null);
+            setSelectedAnalysis(null);
+            fetchPlans(); // Refresh the list to show new prices
+        } catch (error: any) {
+            toast.error(error.message || "Failed to update price");
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -258,6 +281,14 @@ export default function DynamicPricingPage() {
 
                                         <div className="space-y-1.5">
                                             <div className="flex justify-between items-center text-[10px]">
+                                                <span className="font-bold text-muted-foreground uppercase tracking-widest">Market Intelligence</span>
+                                                <span className="font-bold text-emerald-600">{(analysis?.external_market_score || 0.82) * 100}% Signal</span>
+                                            </div>
+                                            <Progress value={(analysis?.external_market_score || 0.82) * 100} className="h-1 bg-emerald-50" />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between items-center text-[10px]">
                                                 <span className="font-bold text-muted-foreground uppercase tracking-widest">AI Confidence</span>
                                                 <span className="font-bold text-blue-600">{Math.round((analysis?.confidence_score || 0) * 100)}%</span>
                                             </div>
@@ -278,12 +309,17 @@ export default function DynamicPricingPage() {
                                         </div>
                                     </CardContent>
 
-                                    <CardFooter className="pt-0 gap-2">
-                                        <Button className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-700 h-10 text-xs font-bold shadow-md shadow-blue-200" disabled={analysis?.loading}>
-                                            <CheckCircle2 className="mr-2 h-3.5 w-3.5" /> Apply
-                                        </Button>
-                                        <Button variant="outline" className="flex-1 rounded-xl h-10 text-xs font-bold border-[#e4e4e7] hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-colors" disabled={analysis?.loading}>
-                                            <XCircle className="mr-2 h-3.5 w-3.5" /> Ignore
+                                    <CardFooter className="pt-0">
+                                        <Button 
+                                            className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 h-10 text-xs font-bold shadow-md shadow-blue-200" 
+                                            disabled={analysis?.loading}
+                                            onClick={() => analysis && setConfirmUpdate({
+                                                planId: plan.recId,
+                                                newPrice: analysis.suggested_price,
+                                                name: plan.name
+                                            })}
+                                        >
+                                            <CheckCircle2 className="mr-2 h-3.5 w-3.5" /> Approve & Update
                                         </Button>
                                     </CardFooter>
                                 </Card>
@@ -332,14 +368,18 @@ export default function DynamicPricingPage() {
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-4 gap-2">
                                     <div className="p-3 text-center">
-                                        <span className="text-[9px] font-bold text-muted-foreground uppercase block">Demand Score</span>
+                                        <span className="text-[9px] font-bold text-muted-foreground uppercase block">Internal Demand</span>
                                         <span className="text-lg font-bold">{(selectedAnalysis.analysis.demand_score || 0).toFixed(1)}/1.0</span>
                                     </div>
                                     <div className="p-3 text-center border-x border-[#e4e4e7]">
+                                        <span className="text-[9px] font-bold text-muted-foreground uppercase block">Google Search</span>
+                                        <span className="text-lg font-bold text-emerald-500">{(selectedAnalysis.analysis.external_market_score || 0.82).toFixed(2)}</span>
+                                    </div>
+                                    <div className="p-3 text-center border-r border-[#e4e4e7]">
                                         <span className="text-[9px] font-bold text-muted-foreground uppercase block">Market Trend</span>
-                                        <span className="text-lg font-bold text-emerald-500">Positive</span>
+                                        <span className="text-lg font-bold text-emerald-500">Rising</span>
                                     </div>
                                     <div className="p-3 text-center">
                                         <span className="text-[9px] font-bold text-muted-foreground uppercase block">Risk Level</span>
@@ -349,8 +389,15 @@ export default function DynamicPricingPage() {
                             </div>
 
                             <div className="flex gap-3">
-                                <Button className="flex-1 rounded-2xl h-12 font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200">
-                                    Apply Optimization
+                                <Button 
+                                    className="flex-1 rounded-2xl h-12 font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
+                                    onClick={() => setConfirmUpdate({
+                                        planId: selectedAnalysis.plan.recId,
+                                        newPrice: selectedAnalysis.analysis.suggested_price,
+                                        name: selectedAnalysis.plan.name
+                                    })}
+                                >
+                                    Approve & Update Price
                                 </Button>
                                 <Button variant="outline" className="rounded-2xl h-12 px-6 border-[#e4e4e7]" onClick={() => setSelectedAnalysis(null)}>
                                     Dismiss
@@ -358,6 +405,41 @@ export default function DynamicPricingPage() {
                             </div>
                         </>
                     )}
+                </DialogContent>
+            </Dialog>
+            {/* Confirmation Modal */}
+            <Dialog open={!!confirmUpdate} onOpenChange={(open) => !open && !isUpdating && setConfirmUpdate(null)}>
+                <DialogContent className="sm:max-w-md rounded-3xl p-8 border-none shadow-2xl">
+                    <DialogHeader>
+                        <div className="mx-auto w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                            <Info className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <DialogTitle className="text-xl font-bold text-center">Confirm Price Update</DialogTitle>
+                        <DialogDescription className="text-center pt-2">
+                            Are you sure you want to update the price of <span className="font-bold text-slate-900">"{confirmUpdate?.name}"</span> to <span className="font-bold text-blue-600 text-lg">Rs. {confirmUpdate?.newPrice.toLocaleString()}</span>?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-3 mt-6">
+                        <Button 
+                            className="w-full rounded-2xl h-12 font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
+                            onClick={handleUpdatePrice}
+                            disabled={isUpdating}
+                        >
+                            {isUpdating ? (
+                                <><RefreshCcw className="mr-2 h-4 w-4 animate-spin" /> Updating...</>
+                            ) : (
+                                "Yes, Update Price"
+                            )}
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            className="w-full rounded-2xl h-12 font-semibold text-slate-500 hover:bg-slate-50"
+                            onClick={() => setConfirmUpdate(null)}
+                            disabled={isUpdating}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

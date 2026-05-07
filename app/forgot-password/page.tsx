@@ -2,9 +2,9 @@
 import { GalleryVerticalEnd } from "lucide-react"
 import Link from "next/link"
 
-import { CompanyStatusCheck } from "@/components/company-status-check"
+import { ForgotPasswordForm } from "@/components/forgot-password-form"
 
-export default function RegistrationStatusPage() {
+export default function ForgotPasswordPage() {
   return (
     <div className="theme-login login-gradient grid min-h-svh lg:grid-cols-2">
       <div className="relative flex flex-col gap-4 p-6 md:p-10">
@@ -18,7 +18,7 @@ export default function RegistrationStatusPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="glass animate-fade-in-up w-full max-w-sm rounded-3xl p-8 md:max-w-md">
-            <CompanyStatusCheck />
+            <ForgotPasswordForm />
           </div>
         </div>
       </div>
@@ -26,13 +26,13 @@ export default function RegistrationStatusPage() {
         <div className="absolute inset-0 bg-black/20 z-10" />
         <img
           src="/login-right-image.jpg"
-          alt="Luxury Workspace"
+          alt="Secure Access"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105 brightness-90"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-20" />
         <div className="absolute bottom-12 left-12 right-12 text-white z-30">
-          <h2 className="mb-4 text-4xl font-bold leading-tight">Your Success is Our Priority</h2>
-          <p className="text-lg font-medium opacity-90">We are carefully reviewing your application to ensure the best possible experience for our community.</p>
+          <h2 className="mb-4 text-4xl font-bold leading-tight">Security You Can Trust</h2>
+          <p className="text-lg font-medium opacity-90">We protect your data and your space with state-of-the-art security measures.</p>
         </div>
       </div>
     </div>

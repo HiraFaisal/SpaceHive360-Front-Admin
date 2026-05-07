@@ -1,38 +1,38 @@
 "use client";
 import { GalleryVerticalEnd } from "lucide-react"
+import Link from "next/link"
 
 import { CompanyRegistrationForm } from "@/components/company-registration-form"
 
 export default function RegisterPage() {
   return (
-    <div className="theme-login grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
+    <div className="theme-login login-gradient grid min-h-svh lg:grid-cols-2">
+      <div className="relative flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
-          <a href="/" className="flex items-center gap-2 font-medium">
-            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-4" />
+          <Link href="/" className="flex items-center gap-2 font-semibold text-primary transition-colors hover:opacity-80">
+            <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-xl shadow-lg shadow-primary/20">
+              <GalleryVerticalEnd className="size-5" />
             </div>
-            SpaceHive360
-          </a>
+            <span className="text-xl tracking-tight">SpaceHive360</span>
+          </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-sm md:max-w-xl">
+          <div className="glass animate-fade-in-up w-full max-w-sm rounded-3xl p-8 md:max-w-xl">
             <CompanyRegistrationForm />
           </div>
         </div>
       </div>
-      <div className="bg-muted relative hidden lg:block overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent z-10" />
+      <div className="relative hidden overflow-hidden lg:block">
+        <div className="absolute inset-0 bg-black/20 z-10" />
         <img
-          src="/abc.png"
+          src="/login-right-image.jpg"
           alt="Luxury Workspace"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.3]"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105 brightness-90"
         />
-        <div className="absolute bottom-10 left-10 right-10 z-20 text-white">
-          <h3 className="text-3xl font-bold mb-2">Elevate Your Workspace</h3>
-          <p className="text-white/80 max-w-md">
-            Streamline your bookings, manage your memberships, and grow your community with our premium coworking management solution.
-          </p>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-20" />
+        <div className="absolute bottom-12 left-12 right-12 text-white z-30">
+          <h2 className="mb-4 text-4xl font-bold leading-tight">Join Our Global Network</h2>
+          <p className="text-lg font-medium opacity-90">Streamline your bookings, manage memberships, and grow your community with ease.</p>
         </div>
       </div>
     </div>

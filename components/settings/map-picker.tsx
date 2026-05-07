@@ -166,7 +166,9 @@ export default function MapPicker({ onLocationSelect, initialLocation }: MapPick
             setSearchQuery(address);
             onLocationSelect(nLat, nLng, address, city);
         } else {
-            alert("Location not found. Please try a more specific address.");
+            // Using console.warn instead of console.error to prevent Turbopack's error overlay 
+            // from appearing on screen while still logging the event.
+            console.warn("Geocoding notice (Status:", status, ")");
         }
     });
   };
@@ -242,7 +244,12 @@ export default function MapPicker({ onLocationSelect, initialLocation }: MapPick
               className="border-none shadow-none focus-visible:ring-0 w-full bg-transparent h-9 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleManualSearch();
+                }
+              }}
           />
         </Autocomplete>
         <div className="flex items-center gap-1.5 shrink-0 pr-1">
