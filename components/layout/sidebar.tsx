@@ -8,7 +8,6 @@ import {
   Briefcase,
   Calendar,
   CreditCard,
-  BarChart3,
   Users,
   HelpCircle,
   Settings,
@@ -49,7 +48,6 @@ const mainNavItems = [
     submenuId: "plans" 
   },
   { href: "/dashboard/feedback", label: "Feedback", icon: MessageSquare },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { 
     href: "/dashboard/settings", 
     label: "Settings", 

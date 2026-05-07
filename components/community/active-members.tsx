@@ -1,16 +1,17 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus } from "lucide-react";
-
-const MEMBERS = [
-  { name: "John Doe", initials: "JD", online: true },
-  { name: "Alice Smith", initials: "AS", online: true },
-  { name: "Bob Johnson", initials: "BJ", online: false },
-  { name: "Emma Wilson", initials: "EW", online: true },
-  { name: "David Lee", initials: "DL", online: true },
-];
+import { useState, useEffect } from "react";
+import { communityApi } from "@/lib/api/community";
 
 export function ActiveMembers() {
+  const [members, setMembers] = useState<any[]>([]);
+
+  useEffect(() => {
+    communityApi.getActiveMembers().then(res => setMembers(res.data));
+  }, []);
   return (
     <Card className="border border-border/50 shadow-sm bg-card rounded-2xl">
       <CardHeader className="pb-4 pt-5 px-6">
@@ -18,7 +19,7 @@ export function ActiveMembers() {
       </CardHeader>
       <CardContent className="px-6 pb-6">
         <div className="flex items-center -space-x-3">
-          {MEMBERS.map((member, i) => (
+          {members.map((member, i) => (
             <div key={i} className="relative">
               <Avatar className="inline-block h-11 w-11 ring-2 ring-background border border-border/50 transition-transform hover:scale-110 hover:z-10 cursor-pointer">
                 <AvatarFallback className="bg-muted text-xs font-semibold">

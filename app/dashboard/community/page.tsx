@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useRef } from "react";
 import { MotionWrapper } from "@/components/ui/motion-wrapper";
 import { CommunityFeed } from "@/components/community/community-feed";
 import { CommunityStats } from "@/components/community/community-stats";
@@ -5,8 +8,26 @@ import { UpcomingEvents } from "@/components/community/upcoming-events";
 import { ActiveMembers } from "@/components/community/active-members";
 import { Button } from "@/components/ui/button";
 import { CalendarPlus, PenSquare } from "lucide-react";
+import { CreatePostModal } from "@/components/community/create-post-modal";
+import { CreateEventModal } from "@/components/community/create-event-modal";
 
 export default function CommunityPage() {
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  
+  // Create refs to trigger refreshes in child components if needed
+  const feedRef = useRef<any>(null);
+  const eventsRef = useRef<any>(null);
+
+  const handlePostSuccess = () => {
+    // In a real app, you might use a shared state or event bus to refresh the feed
+    window.location.reload(); // Simple refresh for now to show new data
+  };
+
+  const handleEventSuccess = () => {
+    window.location.reload();
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -21,12 +42,16 @@ export default function CommunityPage() {
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              className="hidden sm:flex items-center gap-2 rounded-lg border-border hover:bg-muted"
+              onClick={() => setIsEventModalOpen(true)}
+              className="hidden sm:flex items-center gap-2 rounded-lg border-border hover:bg-muted transition-all active:scale-95"
             >
               <CalendarPlus className="h-4 w-4" />
               Create Event
             </Button>
-            <Button className="flex items-center gap-2 rounded-lg bg-primary hover:bg-primary/90">
+            <Button 
+              onClick={() => setIsPostModalOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-primary hover:bg-primary/90 transition-all active:scale-95 shadow-md shadow-primary/10"
+            >
               <PenSquare className="h-4 w-4" />
               Create Post
             </Button>
@@ -58,6 +83,18 @@ export default function CommunityPage() {
           </MotionWrapper>
         </div>
       </div>
+
+      {/* Modals */}
+      <CreatePostModal 
+        isOpen={isPostModalOpen} 
+        onClose={() => setIsPostModalOpen(false)} 
+        onSuccess={handlePostSuccess}
+      />
+      <CreateEventModal 
+        isOpen={isEventModalOpen} 
+        onClose={() => setIsEventModalOpen(false)} 
+        onSuccess={handleEventSuccess}
+      />
     </div>
   );
 }
