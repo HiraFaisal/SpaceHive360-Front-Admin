@@ -6,47 +6,57 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageSquare, Share2, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { communityApi } from "@/lib/api/community";
 
-const TABS = ["All Posts", "Announcements", "Collaboration", "Introductions"];
-
-const POSTS = [
-  {
-    id: 1,
-    author: {
-      name: "Sarah Chen",
-      role: "Startup Founder",
-      location: "Downtown Hub",
-      initials: "SC",
-    },
-    time: "2 hours ago",
-    content: "Just launched our new beta! Looking for feedback from the SpaceHive community on our latest dashboard UI. If anyone has 5 mins for a coffee chat, I'd love to show you what we're building. 🚀",
-    tag: "ANNOUNCEMENT",
-    tagColor: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-    hasImage: true,
-    likes: 24,
-    comments: 12,
-  },
-  {
-    id: 2,
-    author: {
-      name: "Marcus Thorne",
-      role: "Fullstack Dev",
-      location: "Northside Collective",
-      initials: "MT",
-    },
-    time: "5 hours ago",
-    content: "Seeking a designer for a weekend hackathon project. We're building a community-driven sustainability tracker. If you're passionate about ESG and love React, let's talk!",
-    tag: "COLLAB REQUEST",
-    tagColor: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-    action: "Apply to Collab",
-    likes: 8,
-    comments: 5,
-  },
-];
+const TABS = ["All Posts", "Announcements", "Collab Request", "Introductions"];
 
 export function CommunityFeed() {
   const [activeTab, setActiveTab] = useState(0);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedComments, setExpandedComments] = useState<string[]>([]);
+  const [commentsData, setCommentsData] = useState<Record<string, any[]>>({});
+  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "";
+
+  const fetchPosts = async (tag?: string) => {
+    setLoading(true);
+    try {
+      const res = await communityApi.getPosts(tag);
+      setPosts(res.data);
+    } catch (err) {
+      console.error("Failed to fetch posts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const tag = activeTab === 0 ? undefined : TABS[activeTab];
+    fetchPosts(tag);
+  }, [activeTab]);
+
+  const toggleComments = async (postId: string) => {
+    const isExpanded = expandedComments.includes(postId);
+    if (isExpanded) {
+      setExpandedComments(prev => prev.filter(id => id !== postId));
+    } else {
+      setExpandedComments(prev => [...prev, postId]);
+      if (!commentsData[postId]) {
+        setLoadingComments(prev => ({ ...prev, [postId]: true }));
+        try {
+          const res = await communityApi.getComments(postId);
+          setCommentsData(prev => ({ ...prev, [postId]: res.data }));
+        } catch (err) {
+          console.error("Failed to fetch comments:", err);
+        } finally {
+          setLoadingComments(prev => ({ ...prev, [postId]: false }));
+        }
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -72,117 +82,112 @@ export function CommunityFeed() {
 
       {/* Posts */}
       <div className="space-y-4">
-        {POSTS.map((post) => (
-          <Card
-            key={post.id}
-            className="border border-border/50 shadow-sm bg-card hover:shadow-md transition-shadow rounded-2xl overflow-hidden"
-          >
-            <CardHeader className="p-6 pb-4">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {post.author.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-sm font-bold text-foreground">{post.author.name}</h4>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 border",
-                          post.tagColor
-                        )}
-                      >
-                        {post.tag}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {post.author.role} • {post.author.location} • {post.time}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-
-            <CardContent className="px-6 pb-6 space-y-4">
-              <p className="text-sm leading-relaxed text-foreground/90">{post.content}</p>
-
-              {post.hasImage && (
-                <div className="rounded-xl overflow-hidden border border-border/50 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 aspect-video flex items-center justify-center relative">
-                  {/* Placeholder Dashboard Preview */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-teal-600/20 to-emerald-600/20" />
-                  <div className="relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="h-3 w-20 bg-emerald-500/30 rounded-full" />
-                        <div className="h-3 w-12 bg-emerald-500/20 rounded-full" />
+        {loading ? (
+          <div className="text-center py-12 text-muted-foreground">Loading posts...</div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">No posts found in this category.</div>
+        ) : (
+          posts.map((post) => (
+            <Card
+              key={post.recId}
+              className="border border-border/50 shadow-sm bg-card hover:shadow-md transition-shadow rounded-2xl overflow-hidden"
+            >
+              <CardHeader className="p-6 pb-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                        {post.authorInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm font-bold text-foreground">{post.authorName}</h4>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 border",
+                            post.tagColor
+                          )}
+                        >
+                          {post.tag}
+                        </Badge>
                       </div>
-                      <div className="space-y-2">
-                        <div className="h-2 w-full bg-muted rounded-full" />
-                        <div className="h-2 w-5/6 bg-muted rounded-full" />
-                        <div className="h-2 w-4/6 bg-muted rounded-full" />
-                        <div className="h-2 w-3/6 bg-muted rounded-full" />
-                      </div>
-                      <div className="flex gap-2 mt-4">
-                        <div className="h-8 w-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                          <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <div className="h-2 w-3/4 bg-muted rounded-full" />
-                          <div className="h-2 w-1/2 bg-muted/70 rounded-full" />
-                        </div>
-                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {post.authorRole} • {post.authorLocation} • {new Date(post.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
                 </div>
-              )}
+              </CardHeader>
 
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-2 border-t border-border/40">
-                <div className="flex items-center gap-6">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto px-0 text-muted-foreground hover:text-blue-600 hover:bg-transparent gap-1.5"
-                  >
-                    <Heart className="h-4 w-4" />
-                    <span className="text-sm font-medium">{post.likes}</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto px-0 text-muted-foreground hover:text-blue-600 hover:bg-transparent gap-1.5"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    <span className="text-sm font-medium">{post.comments}</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto px-0 text-muted-foreground hover:text-blue-600 hover:bg-transparent gap-1.5"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    <span className="text-sm font-medium">Share</span>
-                  </Button>
-                </div>
-                {post.action && (
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="h-auto px-0 text-blue-600 hover:text-blue-700 font-semibold"
-                  >
-                    {post.action}
-                  </Button>
+              <CardContent className="px-6 pb-6 space-y-4">
+                <p className="text-sm leading-relaxed text-foreground/90">{post.content}</p>
+
+                {post.hasImage && post.imageUrl && (
+                  <div className="rounded-xl overflow-hidden border border-border/50 bg-muted aspect-video flex items-center justify-center relative">
+                    <img 
+                      src={post.imageUrl.startsWith("http") ? post.imageUrl : `${API_BASE_URL}${post.imageUrl}`} 
+                      alt="Post content" 
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+
+                {/* Actions (Admin Read-Only) */}
+                <div className="flex flex-col gap-4 pt-2 border-t border-border/40">
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Heart className="h-4 w-4" />
+                      <span className="text-sm font-medium">{post.likesCount} Likes</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleComments(post.recId)}
+                      className="h-auto px-0 text-muted-foreground hover:text-primary hover:bg-transparent gap-1.5"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      <span className="text-sm font-medium">{post.commentsCount} Comments</span>
+                    </Button>
+                  </div>
+
+                  {/* Comments Section */}
+                  {expandedComments.includes(post.recId) && (
+                    <div className="bg-muted/30 rounded-xl p-4 space-y-4">
+                      <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Discussion</h5>
+                      {loadingComments[post.recId] ? (
+                        <div className="text-xs text-center py-2">Loading discussion...</div>
+                      ) : (commentsData[post.recId]?.length || 0) === 0 ? (
+                        <div className="text-xs text-center py-2 text-muted-foreground">No comments yet.</div>
+                      ) : (
+                        <div className="space-y-4">
+                          {commentsData[post.recId].map((comment: any) => (
+                            <div key={comment.recId} className="flex gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="text-[10px] bg-primary/5">{comment.memberInitials}</AvatarFallback>
+                              </Avatar>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-bold">{comment.memberName}</span>
+                                  <span className="text-[10px] text-muted-foreground">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <p className="text-xs text-foreground/80 leading-relaxed">{comment.content}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );
